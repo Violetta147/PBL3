@@ -1,8 +1,0 @@
----
-description: View related
-globs: 
-alwaysApply: false
----
-
-Don't do Views yet.
-Only creating shared view/layout components when needed
