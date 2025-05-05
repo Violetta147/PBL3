@@ -1,6 +1,6 @@
 {
     "name": "C# (.NET 9.0) Codespace",
-    "image": "mcr.microsoft.com/devcontainers/dotnet:0.10-9.0",
+    "image": "mcr.microsoft.com/devcontainers/dotnet:dev-9.0",
     "features": {
       "ghcr.io/devcontainers/features/docker-in-docker:2": {}
     },
