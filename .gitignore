@@ -10,8 +10,10 @@
 *.userosscache
 *.sln.docstates
 
-#cursor rule
+#cursor rule and my add-by-hand
 .cursor/
+.idea/
+
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

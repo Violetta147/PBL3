@@ -1,0 +1,16 @@
+{
+    "name": "C# (.NET 9.0) Codespace",
+    "image": "mcr.microsoft.com/devcontainers/dotnet:0.10-9.0",
+    "features": {
+      "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    },
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "ms-dotnettools.csharp",
+          "ms-azuretools.vscode-docker"
+        ]
+      }
+    },
+      "postCreateCommand": "dotnet restore && docker compose up -d"
+}

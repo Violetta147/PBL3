@@ -1,0 +1,39 @@
+# Ignore build results
+bin/
+obj/
+
+# User-specific files/folders
+.vs/
+.idea/
+.cursor/
+.devcontainer/
+.vscode/
+*.user
+*.suo
+*.userprefs
+
+# Git files
+.git/
+.gitignore
+
+# Logs
+*.log
+
+# OS generated files
+*.DS_Store
+Thumbs.db
+
+# Package outputs
+*.nupkg
+*.snupkg
+
+# Node modules (if using Node.js/React in the project)
+node_modules/
+
+# Database files
+*.mdf
+*.ldf
+*.db
+
+# Documentation
+README.md
