@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PBL3.Data;
 using PBL3.Models;
-
+using PBL3.IdentityPolicy;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -22,15 +22,18 @@ builder.Services.Configure<IdentityOptions>(options =>
    
     options.Password.RequiredLength = 8;            // Minimum password length.
     options.Password.RequireLowercase = true;       // Require at least one lowercase ('a'-'z').
+    options.User.RequireUniqueEmail = true;
+    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+
 
     // Lockout settings (optional but recommended)
     // options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     // options.Lockout.MaxFailedAccessAttempts = 5;
     // options.Lockout.AllowedForNewUsers = true;
-
-    // User settings (optional)
-    // options.User.RequireUniqueEmail = true; // Ensure emails are unique
 });
+
+builder.Services.AddTransient<IPasswordValidator<AppUser>, CustomPasswordPolicy>();
+builder.Services.AddTransient<IUserValidator<AppUser>, CustomUsernameEmailPolicy>();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 

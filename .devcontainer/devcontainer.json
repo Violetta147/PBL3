@@ -1,16 +1,16 @@
 {
-    "name": "C# (.NET 9.0) Codespace",
-    "image": "mcr.microsoft.com/devcontainers/dotnet:dev-9.0",
-    "features": {
-      "ghcr.io/devcontainers/features/docker-in-docker:2": {}
-    },
-    "customizations": {
-      "vscode": {
-        "extensions": [
-          "ms-dotnettools.csharp",
-          "ms-azuretools.vscode-docker"
-        ]
-      }
-    },
-      "postCreateCommand": "dotnet restore && docker compose up -d"
+  "name": "C# (.NET 9.0) Codespace",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:dev-9.0",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csharp",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  },
+  "postCreateCommand": "dotnet restore && dotnet tool install --global dotnet-ef && export PATH=$PATH:~/.dotnet/tools && docker compose up -d"
 }

@@ -4,18 +4,22 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace PBL3.Controllers
-{   
+{
     public class AdminController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly IPasswordHasher<AppUser> _passwordHasher;
+        private IPasswordValidator<AppUser> _passwordValidator;
+        private IUserValidator<AppUser> _userValidator;
 
-        public AdminController(UserManager<AppUser> userManager, IPasswordHasher<AppUser> passwordHash)
+        public AdminController(UserManager<AppUser> userManager, IPasswordHasher<AppUser> passwordHash, IPasswordValidator<AppUser> passwordValidator, IUserValidator<AppUser> userValidator)
         {
             _userManager = userManager;
             _passwordHasher = passwordHash;
+            _passwordValidator = passwordValidator;
+            _userValidator = userValidator;
         }
-        
+
         public IActionResult Index()
         {
             return View(_userManager.Users);
@@ -51,7 +55,7 @@ namespace PBL3.Controllers
 
         public async Task<IActionResult> Update(string id)
         {
-              AppUser user = await _userManager.FindByIdAsync(id);
+            AppUser user = await _userManager.FindByIdAsync(id);
             if (user != null)
                 return View(user);
             else
@@ -64,17 +68,31 @@ namespace PBL3.Controllers
             AppUser user = await _userManager.FindByIdAsync(id);
             if (user != null)
             {
+                IdentityResult validEmail = null;
                 if (!string.IsNullOrEmpty(email))
-                    user.Email = email;
+                {
+                    validEmail = await _userValidator.ValidateAsync(_userManager, user);
+                    if (validEmail.Succeeded)
+                        user.Email = email;
+                    else
+                        Errors(validEmail);
+                }
                 else
-                    ModelState.AddModelError("", "E-mail cannot be empty");
- 
+                    ModelState.AddModelError("", "Email cannot be empty");
+
+                IdentityResult validPass = null;
                 if (!string.IsNullOrEmpty(password))
-                    user.PasswordHash = _passwordHasher.HashPassword(user, password);
+                {
+                    validPass = await _passwordValidator.ValidateAsync(_userManager, user, password);
+                    if (validPass.Succeeded)
+                        user.PasswordHash = _passwordHasher.HashPassword(user, password);
+                    else
+                        Errors(validPass);
+                }
                 else
                     ModelState.AddModelError("", "Password cannot be empty");
- 
-                if (!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(password))
+
+                if (validEmail != null && validPass != null && validEmail.Succeeded && validPass.Succeeded)
                 {
                     IdentityResult result = await _userManager.UpdateAsync(user);
                     if (result.Succeeded)
@@ -85,9 +103,10 @@ namespace PBL3.Controllers
             }
             else
                 ModelState.AddModelError("", "User Not Found");
+
             return View(user);
         }
- 
+
         private void Errors(IdentityResult result)
         {
             foreach (IdentityError error in result.Errors)
