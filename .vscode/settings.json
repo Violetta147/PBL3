@@ -1,0 +1,21 @@
+{
+    "sqltools.connections": [
+        {
+            "connectionTimeout": 15,
+            "mssqlOptions": {
+                "appName": "SQLTools",
+                "useUTC": true,
+                "encrypt": true,
+                "trustServerCertificate": true
+            },
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 1433,
+            "driver": "MSSQL",
+            "name": "Codespace Test appsetting.development.json and devcontainer.json",
+            "database": "PBL3",
+            "username": "sa",
+            "password": "10405002Qu!"
+        }
+    ]
+}                                          

@@ -1,17 +1,17 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using PBL3.Models;
 
 namespace PBL3.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
-
-    public HomeController(ILogger<HomeController> logger)
+    private readonly UserManager<AppUser> _userManager;
+    public HomeController(UserManager<AppUser> userManager)
     {
-        _logger = logger;
+        _userManager = userManager;
     }
 
     public IActionResult Index()
@@ -29,9 +29,11 @@ public class HomeController : Controller
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
-    [Authorize]
-    public IActionResult Secured()
+    [Authorize(Roles="Manager")]
+    public async Task<IActionResult> Secured()
     {
-        return View((object)"Hello");
+        AppUser user = await _userManager.GetUserAsync(HttpContext.User);
+        string message = "Hello " + user.UserName;
+        return View((object)message);
     }
 }

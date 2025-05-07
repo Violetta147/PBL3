@@ -71,11 +71,14 @@ namespace PBL3.Controllers
                 IdentityResult validEmail = null;
                 if (!string.IsNullOrEmpty(email))
                 {
+                    string originalEmail = user.Email;
+                    user.Email = email;
                     validEmail = await _userValidator.ValidateAsync(_userManager, user);
-                    if (validEmail.Succeeded)
-                        user.Email = email;
-                    else
+                    if (!validEmail.Succeeded)
+                    {
+                        user.Email = originalEmail;
                         Errors(validEmail);
+                    }
                 }
                 else
                     ModelState.AddModelError("", "Email cannot be empty");
@@ -92,7 +95,7 @@ namespace PBL3.Controllers
                 else
                     ModelState.AddModelError("", "Password cannot be empty");
 
-                if (validEmail != null && validPass != null && validEmail.Succeeded && validPass.Succeeded)
+                if ((validEmail == null || validEmail.Succeeded) && (validPass == null || validPass.Succeeded))
                 {
                     IdentityResult result = await _userManager.UpdateAsync(user);
                     if (result.Succeeded)

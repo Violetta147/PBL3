@@ -1,3 +1,11 @@
 ﻿@using PBL3
 @using PBL3.Models
+// Include default ASP.NET Core MVC tag helpers for use across all Razor views
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+// Importing Microsoft.AspNetCore.Identity for handling user authentication and identity management
+@using Microsoft.AspNetCore.Identity
+// Importing custom tag helpers for project-specific functionality
+@addTagHelper PBL3.CustomTagHelpers.*, PBL3
+
+
+
