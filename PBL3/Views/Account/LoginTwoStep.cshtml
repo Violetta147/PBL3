@@ -1,0 +1,24 @@
+@model PBL3.ViewModel.TwoFactor
+@{
+    ViewData["Title"] = "Login Two Step";
+    // Retrieve returnUrl from ViewData to use in the form's route parameter
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
+
+<h1 class="bg-info text-white">Login Two Step</h1>
+<div class="text-danger" asp-validation-summary="All"></div>
+
+<p>Enter your authentication code</p>
+
+@* Ensure asp-route-returnUrl is populated *@
+<form asp-action="LoginTwoStep" asp-route-returnurl="@returnUrl" method="post">
+    @* OR, alternatively and more explicitly, use a hidden input: *@
+    @* <input type="hidden" name="returnUrl" value="@returnUrl" /> *@
+
+    <div class="form-group">
+        <label>Code</label>
+        <input asp-for="TwoFactorCode" class="form-control" />
+        <span asp-validation-for="TwoFactorCode" class="text-danger"></span> @* For displaying validation errors *@
+    </div>
+    <button class="btn btn-primary" type="submit">Log In</button>
+</form>
