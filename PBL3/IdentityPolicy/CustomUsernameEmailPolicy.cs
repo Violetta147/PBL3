@@ -18,7 +18,7 @@ namespace PBL3.IdentityPolicy
                 });
             }
 
-            if (!user.Email.ToLower().EndsWith("@yahoo.com"))
+            if (!user.Email.ToLower().EndsWith("@gmail.com"))
             {
                 errors.Add(new IdentityError
                 {

@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using PBL3.Data;
 using PBL3.Models;
 using PBL3.IdentityPolicy;
+using PBL3.CustomPolicy;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.Google;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -23,6 +26,7 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequiredLength = 8;            // Minimum password length.
     options.Password.RequireLowercase = true;       // Require at least one lowercase ('a'-'z').
     options.User.RequireUniqueEmail = true;
+    options.SignIn.RequireConfirmedEmail = true;
     options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
 
 
@@ -34,6 +38,9 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 builder.Services.AddTransient<IPasswordValidator<AppUser>, CustomPasswordPolicy>();
 builder.Services.AddTransient<IUserValidator<AppUser>, CustomUsernameEmailPolicy>();
+builder.Services.AddTransient<IAuthorizationHandler, AllowUsersHandler>();
+builder.Services.AddTransient<IAuthorizationHandler, AllowPrivateHandler>();
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
@@ -41,6 +48,26 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied";
     options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
     options.SlidingExpiration = true;
+});
+builder.Services.AddAuthentication()
+        .AddGoogle(opts =>
+        {
+            opts.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? throw new InvalidOperationException("Google ClientId not found.");
+            opts.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? throw new InvalidOperationException("Google ClientSecret not found.");
+            opts.SignInScheme = IdentityConstants.ExternalScheme;
+        });
+builder.Services.AddAuthorization(opts => {
+    opts.AddPolicy("AspManager", policy => {
+        policy.RequireRole("Manager");
+        policy.RequireClaim("Coding-Skill", "ASP.NET Core MVC");
+    });
+    opts.AddPolicy("AllowTom", policy => {
+        policy.AddRequirements(new AllowUserPolicy("tom"));
+    });
+    opts.AddPolicy("PrivateAccess", policy =>
+    {
+        policy.AddRequirements(new AllowPrivatePolicy());
+    });
 });
 
 

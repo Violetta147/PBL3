@@ -2,6 +2,7 @@ using PBL3.Models;
 using PBL3.ViewModel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using PBL3.Ultilities;
 
 namespace PBL3.Controllers
 {
@@ -35,12 +36,23 @@ namespace PBL3.Controllers
                 AppUser appUser = new AppUser
                 {
                     UserName = user.Name,
-                    Email = user.Email
+                    Email = user.Email,
+                    TwoFactorEnabled = true
                 };
                 IdentityResult result = await _userManager.CreateAsync(appUser, user.Password);
                 if (result.Succeeded)
                 {
-                    return RedirectToAction("Index");
+                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(appUser);
+                    var confirmationLink = Url.Action("ConfirmEmail", "Email", new { token, email = user.Email }, Request.Scheme);
+                    EmailHelper emailHelper = new EmailHelper();
+                    bool emailResponse = emailHelper.SendEmail(user.Email, confirmationLink);
+
+                    if (emailResponse)
+                        return RedirectToAction("Index");
+                    else
+                    {
+                        // log email failed 
+                    }
                 }
                 else
                 {
@@ -66,6 +78,7 @@ namespace PBL3.Controllers
         public async Task<IActionResult> Update(string id, string email, string password)
         {
             AppUser user = await _userManager.FindByIdAsync(id);
+            user.TwoFactorEnabled = true;
             if (user != null)
             {
                 IdentityResult validEmail = null;
