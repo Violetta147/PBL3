@@ -19,6 +19,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
             sqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", "dbo");
         }
     ));
+builder.Services.AddIdentity<AppUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 builder.Services.Configure<IdentityOptions>(options =>
 {
 
@@ -31,9 +33,13 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 
     // Lockout settings (optional but recommended)
-    // options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-    // options.Lockout.MaxFailedAccessAttempts = 5;
-    // options.Lockout.AllowedForNewUsers = true;
+    options.Lockout.AllowedForNewUsers = true;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
+    options.Lockout.MaxFailedAccessAttempts = 3;
+});
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromHours(10);
 });
 
 builder.Services.AddTransient<IPasswordValidator<AppUser>, CustomPasswordPolicy>();
@@ -73,8 +79,6 @@ builder.Services.AddAuthorization(opts => {
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddIdentity<AppUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
-    .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 

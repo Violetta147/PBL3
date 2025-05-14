@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using PBL3.Ultilities;
+using System.ComponentModel.DataAnnotations;
 
 namespace PBL3.Controllers
 {
@@ -38,12 +39,19 @@ namespace PBL3.Controllers
                 if (appUser != null)
                 {
                     await _signInManager.SignOutAsync(); //!!
-                    Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(appUser, login.Password, login.Remember, false);
+                    Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(appUser, login.Password, login.Remember, true);
                     if (result.Succeeded)
                         return Redirect(login.ReturnUrl ?? "/");
                     if (result.RequiresTwoFactor)
                     {
                         return RedirectToAction("LoginTwoStep", new { appUser.Email, login.ReturnUrl });
+                    }
+                    if (result.IsLockedOut)
+                        ModelState.AddModelError("", "Your account is locked out. Kindly wait for 10 minutes and try again");
+                    bool emailStatus = await _userManager.IsEmailConfirmedAsync(appUser);
+                    if (emailStatus == false)
+                    {
+                        ModelState.AddModelError(nameof(login.Email), "Email is unconfirmed, please confirm it first");
                     }
                 }
                 ModelState.AddModelError(nameof(login.Email), "Login Failed: Invalid Email or password");
@@ -163,6 +171,77 @@ namespace PBL3.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+         [AllowAnonymous]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+ 
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPassword([Required]string email)
+        {
+            if (!ModelState.IsValid)
+                return View(email);
+ 
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return RedirectToAction(nameof(ForgotPasswordConfirmation));
+ 
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var link = Url.Action("ResetPassword", "Account", new { token, email = user.Email }, Request.Scheme);
+ 
+            EmailHelper emailHelper = new EmailHelper();
+            bool emailResponse = emailHelper.SendEmailPasswordReset(user.Email, link);
+ 
+            if (emailResponse)
+                return RedirectToAction("ForgotPasswordConfirmation");
+            else
+            {
+                // log email failed 
+            }
+            return View(email);
+        }
+ 
+        [AllowAnonymous]
+        public IActionResult ForgotPasswordConfirmation()
+        {
+            return View();
+        }
+
+        [AllowAnonymous]
+        public IActionResult ResetPassword(string token, string email)
+        {
+            var model = new ResetPassword{ Token = token, Email = email };
+            return View(model);
+        }
+        public IActionResult ResetPasswordConfirmation()
+        {
+            return View();
+        }
+ 
+ 
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPassword(ResetPassword resetPassword)
+        {
+            if (!ModelState.IsValid)
+                return View(resetPassword);
+ 
+            var user = await _userManager.FindByEmailAsync(resetPassword.Email);
+            if (user == null)
+                RedirectToAction("ResetPasswordConfirmation");
+ 
+            var resetPassResult = await _userManager.ResetPasswordAsync(user, resetPassword.Token, resetPassword.Password);
+            if (!resetPassResult.Succeeded)
+            {
+                foreach (var error in resetPassResult.Errors)
+                    ModelState.AddModelError(error.Code, error.Description);
+                return View();
+            }
+ 
+            return RedirectToAction("ResetPasswordConfirmation");
+        }
 
         public IActionResult AccessDenied()
         {

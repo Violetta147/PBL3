@@ -48,8 +48,35 @@ namespace PBL3.Ultilities
             SmtpClient client = new SmtpClient();
             client.Credentials = new System.Net.NetworkCredential("nguyenhuuminhquan147@gmail.com", "zrnl lupc neix rlmm");
             client.Host = "smtp.gmail.com";
+            client.EnableSsl = true;
             client.Port = 587;
  
+            try
+            {
+                client.Send(mailMessage);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // log exception
+            }
+            return false;
+        }
+         public bool SendEmailPasswordReset(string userEmail, string link)
+        {
+            MailMessage mailMessage = new MailMessage();
+            mailMessage.From = new MailAddress("nguyenhuuminhquan147@gmail.com");
+            mailMessage.To.Add(new MailAddress(userEmail));
+ 
+            mailMessage.Subject = "Password Reset";
+            mailMessage.IsBodyHtml = true;
+            mailMessage.Body = link;
+ 
+            SmtpClient client = new SmtpClient();
+            client.Credentials = new System.Net.NetworkCredential("nguyenhuuminhquan147@gmail.com", "zrnl lupc neix rlmm");
+            client.Host = "smtp.gmail.com";
+            client.Port = 587;
+            client.EnableSsl = true;
             try
             {
                 client.Send(mailMessage);

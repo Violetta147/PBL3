@@ -22,7 +22,7 @@ namespace PBL3.IdentityPolicy
             {
                 errors.Add(new IdentityError
                 {
-                    Description = "Only yahoo.com email addresses are allowed"
+                    Description = "Only gmail.com email addresses are allowed"
                 });
             }
             return errors.Count == 0 ? IdentityResult.Success : IdentityResult.Failed(errors.ToArray());
