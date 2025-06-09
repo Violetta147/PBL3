@@ -1,0 +1,133 @@
+﻿@* Views/AdminUser/Index.cshtml *@
+@model PBL3.Models.Common.PagedResult<PBL3.ViewModel.Admin.UserListItemViewModel>
+@{
+    Layout = "_AdminLayout"; // Sử dụng Admin Layout
+    ViewData["Title"] = "Quản lý Người dùng";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">@ViewData["Title"]</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        @* <a asp-action="CreateUser" class="btn btn-sm btn-outline-primary">
+            <i class="fas fa-plus-circle"></i> Thêm người dùng mới
+        </a> *@
+    </div>
+</div>
+
+@* Form tìm kiếm *@
+<form asp-action="Index" method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" name="searchTerm" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Tìm theo tên đăng nhập, email, tên hiển thị...">
+        <button type="submit" class="btn btn-outline-secondary"><i class="fas fa-search"></i> Tìm</button>
+        @if (!string.IsNullOrEmpty((string?)ViewData["CurrentFilter"]))
+        {
+            <a asp-action="Index" class="btn btn-outline-danger" title="Xóa bộ lọc"><i class="fas fa-times"></i></a>
+        }
+    </div>
+</form>
+
+
+@if (Model != null && Model.Items.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-hover table-bordered table-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.Items.First().UserName)</th>
+                    <th>@Html.DisplayNameFor(model => model.Items.First().Email)</th>
+                    <th>@Html.DisplayNameFor(model => model.Items.First().DisplayName)</th>
+                    <th>@Html.DisplayNameFor(model => model.Items.First().Roles)</th>
+                    <th>@Html.DisplayNameFor(model => model.Items.First().EmailConfirmed)</th>
+                    <th>@Html.DisplayNameFor(model => model.Items.First().IsLockedOut)</th>
+                    <th>@Html.DisplayNameFor(model => model.Items.First().LockoutEnd)</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model.Items)
+                {
+                    <tr>
+                        <td>@user.UserName</td>
+                        <td>@user.Email</td>
+                        <td>@user.DisplayName</td>
+                        <td>@string.Join(", ", user.Roles)</td>
+                        <td>
+                            @if (user.EmailConfirmed)
+                            {
+                                <span class="badge bg-success">Đã xác thực</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark">Chưa xác thực</span>
+                            }
+                        </td>
+                        <td>
+                            @if (user.IsLockedOut)
+                            {
+                                <span class="badge bg-danger">Đang bị khóa</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Hoạt động</span>
+                            }
+                        </td>
+                        <td>@(user.LockoutEnd.HasValue ? user.LockoutEnd.Value.ToString("dd/MM/yyyy HH:mm") : "N/A")</td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@user.UserId" class="btn btn-info btn-sm" title="Xem chi tiết"><i class="fas fa-eye"></i></a>
+                            <a asp-action="EditRoles" asp-route-id="@user.UserId" class="btn btn-warning btn-sm" title="Sửa vai trò"><i class="fas fa-user-tag"></i></a>
+                            @if (user.IsLockedOut)
+                            {
+                                <form asp-action="UnlockUser" asp-route-id="@user.UserId" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn mở khóa tài khoản này?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-success btn-sm" title="Mở khóa"><i class="fas fa-unlock"></i></button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form asp-action="LockoutUser" asp-route-id="@user.UserId" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn khóa tài khoản này?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-danger btn-sm" title="Khóa tài khoản"><i class="fas fa-lock"></i></button>
+                                </form>
+                            }
+                            @* Nút xóa user cần cẩn thận, có thể thêm sau *@
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @* Phân trang *@
+    <nav aria-label="User list navigation">
+        <ul class="pagination justify-content-center">
+            @if (Model.HasPreviousPage)
+            {
+                <li class="page-item"><a class="page-link" asp-action="Index" asp-route-searchTerm="@ViewData["CurrentFilter"]" asp-route-pageNumber="@(Model.PageNumber - 1)" asp-route-pageSize="@Model.PageSize">Trước</a></li>
+            }
+            else
+            {
+                <li class="page-item disabled"><span class="page-link">Trước</span></li>
+            }
+
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-searchTerm="@ViewData["CurrentFilter"]" asp-route-pageNumber="@i" asp-route-pageSize="@Model.PageSize">@i</a>
+                </li>
+            }
+
+            @if (Model.HasNextPage)
+            {
+                <li class="page-item"><a class="page-link" asp-action="Index" asp-route-searchTerm="@ViewData["CurrentFilter"]" asp-route-pageNumber="@(Model.PageNumber + 1)" asp-route-pageSize="@Model.PageSize">Sau</a></li>
+            }
+            else
+            {
+                <li class="page-item disabled"><span class="page-link">Sau</span></li>
+            }
+        </ul>
+    </nav>
+}
+else
+{
+    <div class="alert alert-info">Không tìm thấy người dùng nào.</div>
+}

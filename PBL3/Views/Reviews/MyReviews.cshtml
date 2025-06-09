@@ -1,0 +1,239 @@
+﻿@model IEnumerable<PBL3.ViewModel.Review.UserReviewListItemViewModel>
+@{
+    ViewData["Title"] = "Đánh giá của tôi";
+    // Layout = ...
+}
+
+<form id="antiForgeryTokenForm" class="d-none">@Html.AntiForgeryToken()</form>
+
+<div class="container mt-4 mb-5">
+    <h1 class="display-5 fw-bold mb-4">@ViewData["Title"]</h1>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="list-group shadow-sm">
+            @foreach (var review in Model)
+            {
+                <div class="list-group-item list-group-item-action flex-column align-items-start mb-2 border rounded-3 p-3">
+                    <div class="row g-0">
+                        <div class="col-md-2 text-center">
+                            @if (!string.IsNullOrEmpty(review.RestaurantImageUrl))
+                            {
+                                <img src="@review.RestaurantImageUrl" class="img-fluid rounded" alt="@review.RestaurantName" style="max-height: 100px; max-width:100%; object-fit: cover;">
+                            }
+                            else
+                            {
+                                <img src="/images/placeholder-restaurant.png" class="img-fluid rounded" alt="Ảnh mặc định" style="max-height: 100px; max-width:100%; object-fit: cover;">
+                            }
+                            <a href="@review.ViewRestaurantUrl" class="d-block mt-2 small text-decoration-none">@review.RestaurantName</a>
+                        </div>
+                        <div class="col-md-10 ps-md-3">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="fas fa-star @(i <= review.Rating ? "text-warning" : "text-muted opacity-50")"></i>
+                                    }
+                                </h5>
+                                <small class="text-muted">@review.ReviewDate.ToString("dd/MM/yyyy")</small>
+                            </div>
+                            @if (!string.IsNullOrEmpty(review.Comment))
+                            {
+                                <p class="mb-2">@review.Comment</p>
+                            }
+                            else
+                            {
+                                <p class="mb-2 fst-italic text-muted">Không có bình luận.</p>
+                            }
+
+                            @if (review.ReviewPhotoUrls.Any())
+                            {
+                                <div class="mb-2">
+                                    @foreach (var photoUrl in review.ReviewPhotoUrls.Take(4)) @* Hiển thị tối đa 4 ảnh review *@
+                                    {
+                                        <a href="@photoUrl" data-bs-toggle="lightbox" data-gallery="my-review-photos-@review.ReviewId">
+                                            <img src="@photoUrl" class="img-thumbnail me-1 mb-1" style="width:60px; height:60px; object-fit:cover;" alt="Ảnh review" />
+                                        </a>
+                                    }
+                                    @if (review.ReviewPhotoUrls.Count > 4)
+                                    {
+                                        <small class="text-muted ms-1">(và @(review.ReviewPhotoUrls.Count - 4) ảnh khác)</small>
+                                    }
+                                </div>
+                            }
+                            <div class="mt-2">
+                                <a href="@review.EditReviewUrl" class="btn btn-outline-primary btn-sm me-2">
+                                    <i class="fas fa-edit"></i> Sửa
+                                </a>
+                                <button type="button" class="btn btn-outline-danger btn-sm btn-delete-my-review"
+                                        data-review-id="@review.ReviewId"
+                                        data-restaurant-name="@review.RestaurantName"
+                                        data-delete-url="@Url.Action("DeleteReview", "Reviews", new { id = review.ReviewId })">
+                                    <i class="fas fa-trash"></i> Xóa
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center">
+            <i class="far fa-comment-alt fa-3x mb-3 d-block"></i>
+            Bạn chưa viết đánh giá nào. Hãy khám phá và chia sẻ cảm nhận của bạn! <br />
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-3">Tìm nhà hàng ngay</a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    @* bs5-lightbox JS nếu bạn dùng *@
+    @* <script src="https://cdn.jsdelivr.net/npm/bs5-lightbox@1.8.3/dist/bs5-lightbox.min.js"></script> *@
+    @* SweetAlert2 JS (nếu bạn dùng) *@
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        $(document).ready(function () {
+            var antiForgeryToken = $('form#antiForgeryTokenForm input[name="__RequestVerificationToken"]').first().val() || $('meta[name="x-csrf-token"]').attr('content');
+            if (!antiForgeryToken) {
+                console.warn("Anti-forgery token không tìm thấy. Các thao tác POST/DELETE có thể thất bại.");
+            }
+
+            // Hàm hiển thị thông báo chung (cần được định nghĩa ở đâu đó, ví dụ site.js hoặc layout)
+            function showGlobalSuccessMessage(message) {
+                // Ví dụ đơn giản, bạn nên dùng Toastr hoặc một hệ thống thông báo tốt hơn
+                if ($('#global-alert-container').length === 0) {
+                    $('.container').first().prepend('<div id="global-alert-container" class="mb-3" style="position: sticky; top: 10px; z-index: 1056;"></div>');
+                }
+                var alertId = 'success-alert-' + Date.now();
+                $('#global-alert-container').append(
+                    '<div class="alert alert-success alert-dismissible fade show" role="alert" id="' + alertId + '">' +
+                    escapeHtml(message) +
+                    '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                    '</div>'
+                );
+                setTimeout(function () { $('#' + alertId).alert('close'); }, 5000);
+            }
+
+            function showGlobalErrorMessage(message) {
+                 if ($('#global-alert-container').length === 0) {
+                    $('.container').first().prepend('<div id="global-alert-container" class="mb-3" style="position: sticky; top: 10px; z-index: 1056;"></div>');
+                }
+                var alertId = 'error-alert-' + Date.now();
+                $('#global-alert-container').append(
+                    '<div class="alert alert-danger alert-dismissible fade show" role="alert" id="' + alertId + '">' +
+                    escapeHtml(message) +
+                    '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                    '</div>'
+                );
+            }
+
+            function escapeHtml(unsafe) {
+                if (typeof unsafe !== 'string') return '';
+                return unsafe
+                    .replace(/&/g, "&")
+                    .replace(/</g, "<")
+                    .replace(/>/g, ">")
+                    .replace(/"/g, "\"")
+                    .replace(/'/g, "'");
+            }
+
+
+            // Xử lý nút xóa review
+            $('.list-group').on('click', '.btn-delete-my-review', function () { // Event delegation
+                var $button = $(this);
+                var reviewId = $button.data('review-id');
+                var restaurantName = $button.data('restaurant-name') || "nhà hàng này";
+                var deleteUrl = $button.data('delete-url'); // URL đã bao gồm ID, ví dụ: /Reviews/DeleteReview/123
+
+                if (!deleteUrl || !reviewId) {
+                    showGlobalErrorMessage('Lỗi: Không thể xác định thông tin để xóa đánh giá.');
+                    console.error("Delete button missing data-review-id or data-delete-url. URL from data: " + deleteUrl + ", ID from data: " + reviewId);
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Xác nhận xóa',
+                    html: `Bạn có chắc chắn muốn xóa đánh giá của mình cho nhà hàng <strong>${escapeHtml(restaurantName)}</strong> không?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Xóa!',
+                    cancelButtonText: 'Hủy bỏ',
+                    customClass: {
+                        confirmButton: 'btn btn-danger ms-2',
+                        cancelButton: 'btn btn-secondary'
+                    },
+                    buttonsStyling: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        if (!antiForgeryToken) {
+                             showGlobalErrorMessage('Lỗi bảo mật khi xóa. Vui lòng tải lại trang.');
+                             return;
+                        }
+                        var originalButtonHtml = $button.html(); // Lưu lại HTML của nút
+
+                        $.ajax({
+                            url: deleteUrl, // URL đã chứa ID
+                            type: 'POST',
+                            data: {
+                                __RequestVerificationToken: antiForgeryToken
+                                // Không cần gửi 'id' trong data nếu URL đã là /Reviews/DeleteReview/123
+                                // Nếu Action DeleteReview(int id) của bạn mong đợi ID từ route, thì URL phải đúng.
+                                // Nếu Action DeleteReview(SomeModel model) mong đợi ID trong model, thì data phải là { id: reviewId, __RequestVerificationToken: ... }
+                            },
+                            beforeSend: function () {
+                                $button.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Đang xóa...');
+                            },
+                            success: function (response) {
+                                if (response.success) {
+                                    showGlobalSuccessMessage(response.message || 'Đánh giá đã được xóa.');
+                                    $button.closest('.list-group-item').fadeOut(500, function() {
+                                        $(this).remove();
+                                        if ($('.list-group-item').length === 0) {
+                                            // Hiển thị lại thông báo "Bạn chưa viết đánh giá nào"
+                                            $('.list-group').replaceWith(
+                                                '<div class="alert alert-info text-center">' +
+                                                '<i class="far fa-comment-alt fa-3x mb-3 d-block"></i>' +
+                                                'Bạn chưa viết đánh giá nào. Hãy khám phá và chia sẻ cảm nhận của bạn! <br />' +
+                                                '<a href="@Url.Action("Index", "Home")" class="btn btn-primary mt-3">Tìm nhà hàng ngay</a>' + // Cần Razor để tạo URL này, hoặc hardcode
+                                                '</div>'
+                                            );
+                                        }
+                                    });
+                                } else {
+                                    showGlobalErrorMessage(response.message || 'Không thể xóa đánh giá.');
+                                    $button.prop('disabled', false).html(originalButtonHtml); // Khôi phục nút nếu lỗi
+                                }
+                            },
+                            error: function (xhr) {
+                                console.error("Error deleting review: ", xhr.status, xhr.responseText);
+                                showGlobalErrorMessage('Lỗi khi xóa đánh giá. Chi tiết: ' + (xhr.responseText || 'Lỗi không xác định'));
+                                $button.prop('disabled', false).html(originalButtonHtml); // Khôi phục nút nếu lỗi
+                            }
+                            // Không cần 'complete' ở đây nữa nếu đã xử lý trong success/error
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}

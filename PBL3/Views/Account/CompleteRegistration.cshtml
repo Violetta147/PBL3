@@ -1,0 +1,80 @@
+﻿@* File: Views/Account/CompleteRegistration.cshtml *@
+@model PBL3.ViewModel.CompleteRegistrationViewModel
+@{
+    ViewData["Title"] = "Hoàn tất Đăng ký";
+    Layout = "_Layout";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h3 class="fw-bold">Hoàn tất thông tin tài khoản FishLoot</h3>
+                        <p class="text-muted">Cung cấp thêm một vài thông tin để chúng tôi có thể tạo tài khoản cho bạn.</p>
+                    </div>
+
+                    <form asp-action="CompleteRegistration" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="ReturnUrl" />
+                        @* Email và UserName có thể được điền sẵn và readonly *@
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" readonly />
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="UserName" class="form-label"></label>
+                            <input asp-for="UserName" class="form-control" />
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+
+                        @* Yêu cầu nhập lại mật khẩu đã đăng ký ở modal *@
+                        <div class="mb-3">
+                            <label asp-for="PasswordToConfirm" class="form-label"></label>
+                            <input asp-for="PasswordToConfirm" type="password" class="form-control" />
+                            <span asp-validation-for="PasswordToConfirm" class="text-danger"></span>
+                        </div>
+
+                        <hr />
+                        <p class="text-muted small">Thông tin bổ sung (tùy chọn):</p>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label"></label>
+                            <input asp-for="Address" class="form-control" placeholder="Địa chỉ của bạn" />
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Gender" class="form-label"></label>
+                            <select asp-for="Gender" class="form-select" asp-items="Html.GetEnumSelectList<PBL3.Models.GenderType>()">
+                                <option value="">-- Chọn giới tính --</option>
+                            </select>
+                            <span asp-validation-for="Gender" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="DateOfBirth" class="form-label"></label>
+                            <input asp-for="DateOfBirth" type="date" class="form-control" />
+                            <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber" class="form-label"></label>
+                            <input asp-for="PhoneNumber" class="form-control" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg">Hoàn tất và Tạo tài khoản</button>
+                        </div>
+                        <div asp-validation-summary="All" class="text-danger small"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

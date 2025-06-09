@@ -1,0 +1,130 @@
+﻿@model PBL3.ViewModel.Restaurant.RestaurantMenuManagementViewModel
+@using PBL3.Extensions
+@using System.Text.Encodings.Web;
+@{
+    ViewData["Title"] = $"Quản lý Thực đơn - {Model.RestaurantName}";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/manage-menu.css" asp-append-version="true" />
+    <style>
+        /* CSS tạm thời để dễ hình dung, bạn sẽ style đẹp hơn sau trong manage-menu.css */
+        .menu-actions button, .menu-section-actions button, .menu-item-actions button {
+            margin-left: 5px;
+        }
+
+        .menu-level {
+            margin-left: 20px;
+            border-left: 1px dashed #ccc;
+            padding-left: 15px;
+        }
+
+        .menu-header, .section-header, .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 4px;
+        }
+
+        .menu-header {
+            background-color: #e9ecef;
+        }
+
+        .section-header {
+            background-color: #f8f9fa;
+        }
+
+        .item-header {
+            background-color: #fff;
+            border: 1px solid #eee;
+        }
+
+        #global-alert-container .alert {
+            min-width: 300px;
+        }
+    </style>
+}
+
+@* Form ẩn chỉ để chứa AntiForgeryToken cho các AJAX POST không dùng data-ajax của unobtrusive *@
+<form id="antiForgeryTokenForm" class="d-none">@Html.AntiForgeryToken()</form>
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-5 fw-bold">@ViewData["Title"]</h1>
+            <p class="lead text-muted">Nhà hàng: <strong>@Model.RestaurantName</strong></p>
+        </div>
+        <a asp-action="MyRestaurants" asp-controller="Business" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Quay lại DS Nhà hàng
+        </a>
+    </div>
+
+    @* Container cho thông báo toàn cục *@
+    <div id="global-alert-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1056;">
+        @* Thông báo từ TempData sẽ hiển thị ở đây nếu bạn có logic JS để chuyển nó vào đây *@
+    </div>
+
+
+    <div class="mb-3">
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#menuCrudModal"
+                data-url="@Url.Action("GetCreateMenuForm", "Business", new { restaurantId = Model.RestaurantId })"
+                data-modal-title="Tạo Thực Đơn Mới cho @Model.RestaurantName">
+            <i class="fas fa-plus"></i> Tạo Thực Đơn Mới
+        </button>
+    </div>
+
+    @* Container này sẽ được cập nhật bằng AJAX *@
+    <div id="menuStructureContainer" data-restaurant-id="@Model.RestaurantId">
+        @* Gọi PartialView để render cấu trúc menu ban đầu *@
+        @await Html.PartialAsync("_MenuStructurePartial", Model.Menus)
+    </div>
+</div>
+
+<!-- Modal Placeholder -->
+<div class="modal fade" id="menuCrudModal" tabindex="-1" aria-labelledby="menuCrudModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        @* modal-lg và căn giữa *@
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="menuCrudModalLabel">Quản lý Mục</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="menuCrudModalBody">
+                <div class="text-center p-5">
+                    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Đang tải...</p>
+                </div>
+            </div>
+            @* Footer của Modal sẽ được render bởi PartialView của form *@
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    @* Đảm bảo jquery.unobtrusive-ajax.min.js được load nếu bạn dùng data-ajax-* attributes *@
+    <script src="~/lib/jquery-ajax-unobtrusive/jquery.unobtrusive-ajax.min.js" asp-append-version="true"></script>
+    <script src="~/js/manage-menu.js" asp-append-version="true"></script>
+
+    @* Hiển thị TempData message bằng JS (nếu có) *@
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <script type="text/javascript">
+            showGlobalSuccessMessage('@Html.Raw(JavaScriptEncoder.Default.Encode(TempData["SuccessMessage"].ToString()))');
+        </script>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <script type="text/javascript">
+            showGlobalErrorMessage('@Html.Raw(JavaScriptEncoder.Default.Encode(TempData["ErrorMessage"].ToString()))');
+        </script>
+    }
+}

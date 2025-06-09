@@ -1,0 +1,663 @@
+﻿@using PBL3.ViewModel.Restaurant
+@model EditRestaurantViewModel
+@{
+    ViewData["Title"] = $"Chỉnh sửa: {Model.Name}"; // Sử dụng tên nhà hàng từ Model
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    @* Link đến file CSS riêng nếu bạn đã tạo, ví dụ: *@
+    <link rel="stylesheet" href="~/css/edit-restaurant.css" asp-append-version="true" />
+}
+
+<div class="container-fluid px-3 py-4">
+    @* Thêm py-4 cho khoảng cách trên dưới *@
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-11 col-xl-10">
+            @* Điều chỉnh lại cột cho phù hợp hơn *@
+            <div class="main-container">
+                <div class="page-header">
+                    <h1 class="page-title">Chỉnh sửa Doanh nghiệp</h1>
+                    <p class="page-subtitle">Cập nhật thông tin cho "@Model.Name"</p>
+                </div>
+
+                <form asp-controller="Business" asp-action="EditRestaurant" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="AddressId" />
+                    <input type="hidden" asp-for="CurrentMainImageUrl" />
+                    <input type="hidden" asp-for="CurrentMainImagePublicId" />
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger alert-modern mb-3"></div>
+
+                    <!-- Thông tin cơ bản -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <i class="fas fa-store"></i>
+                            <h4>Thông tin Cơ bản</h4>
+                        </div>
+                        <div class="section-body">
+                            <div class="comparison-container">
+                                <div class="current-info">
+                                    <div class="info-label"><i class="fas fa-info-circle"></i> Thông tin hiện tại</div>
+                                    <div class="mb-3"><strong>Tên nhà hàng:</strong><div class="current-value">@(Model.Name ?? "N/A")</div></div>
+                                    <div class="mb-3"><strong>Mô tả:</strong><div class="current-value" style="white-space: pre-wrap;">@(Model.Description ?? "N/A")</div></div>
+                                    <div class="mb-3"><strong>Số điện thoại:</strong><div class="current-value">@(Model.PhoneNumber ?? "N/A")</div></div>
+                                    <div class="mb-3"><strong>Website:</strong><div class="current-value">@(Model.Website ?? "N/A")</div></div>
+                                    <div class="mb-3">
+                                        <strong>Khoảng giá:</strong><div class="current-value">
+                                            @if (Model.MinTypicalPrice.HasValue || Model.MaxTypicalPrice.HasValue)
+                                            {
+                                                <div class="price-display">
+                                                    <span class="price-range">
+                                                        @if (Model.MinTypicalPrice.HasValue && Model.MaxTypicalPrice.HasValue)
+                                                        {
+                                                            @($"{Model.MinTypicalPrice:N0} - {Model.MaxTypicalPrice:N0} VNĐ")
+                                                        }
+                                                        else if (Model.MinTypicalPrice.HasValue)
+                                                        {
+                                                            @($"Từ {Model.MinTypicalPrice:N0} VNĐ")
+                                                        }
+                                                        else if (Model.MaxTypicalPrice.HasValue)
+                                                        {
+                                                            @($"Đến {Model.MaxTypicalPrice:N0} VNĐ")
+                                                        }
+                                                    </span>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <span class="empty-value">N/A</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="new-info">
+                                    <div class="info-label"><i class="fas fa-edit"></i> Thông tin mới</div>
+                                    <div class="mb-3">
+                                        <label asp-for="Name" class="form-label"></label>
+                                        <input asp-for="Name" class="form-control-modern" />
+                                        <span asp-validation-for="Name" class="text-danger validation-error"></span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label asp-for="Description" class="form-label"></label>
+                                        <textarea asp-for="Description" class="form-control-modern" rows="4"></textarea>
+                                        <span asp-validation-for="Description" class="text-danger validation-error"></span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label asp-for="PhoneNumber" class="form-label"></label>
+                                        <input asp-for="PhoneNumber" class="form-control-modern" />
+                                        <span asp-validation-for="PhoneNumber" class="text-danger validation-error"></span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label asp-for="Website" class="form-label"></label>
+                                        <input asp-for="Website" class="form-control-modern" />
+                                        <span asp-validation-for="Website" class="text-danger validation-error"></span>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label asp-for="MinTypicalPrice" class="form-label"></label>
+                                            <div class="input-group">
+                                                <input asp-for="MinTypicalPrice" type="number" class="form-control-modern" />
+                                                <span class="input-group-text input-group-modern">VNĐ</span>
+                                            </div>
+                                            <span asp-validation-for="MinTypicalPrice" class="text-danger validation-error"></span>
+                                        </div>
+                                        <div class="col-6">
+                                            <label asp-for="MaxTypicalPrice" class="form-label"></label>
+                                            <div class="input-group">
+                                                <input asp-for="MaxTypicalPrice" type="number" class="form-control-modern" />
+                                                <span class="input-group-text input-group-modern">VNĐ</span>
+                                            </div>
+                                            <span asp-validation-for="MaxTypicalPrice" class="text-danger validation-error"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Địa chỉ -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <h4>Địa chỉ</h4>
+                        </div>
+                        <div class="section-body">
+                            <div class="comparison-container">
+                                <div class="current-info">
+                                    <div class="info-label"><i class="fas fa-info-circle"></i> Địa chỉ hiện tại</div>
+                                    <div class="current-value">
+                                        <div>
+                                            <strong>@Model.AddressLine1</strong><br />
+                                            @Model.Ward, @Model.District<br />
+                                            @Model.City, @(Model.Country ?? "Việt Nam")<br />
+                                            @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+                                            {
+                                                <small class="text-muted">@Model.Latitude.Value.ToString("N4")° N, @Model.Longitude.Value.ToString("N4")° E</small>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="new-info">
+                                    <div class="info-label"><i class="fas fa-edit"></i> Cập nhật địa chỉ</div>
+                                    <div class="mb-3">
+                                        <label asp-for="AddressLine1" class="form-label"></label>
+                                        <input asp-for="AddressLine1" class="form-control-modern" />
+                                        <span asp-validation-for="AddressLine1" class="text-danger validation-error"></span>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label asp-for="Ward" class="form-label"></label>
+                                            <input asp-for="Ward" class="form-control-modern" />
+                                            <span asp-validation-for="Ward" class="text-danger validation-error"></span>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label asp-for="District" class="form-label"></label>
+                                            <input asp-for="District" class="form-control-modern" />
+                                            <span asp-validation-for="District" class="text-danger validation-error"></span>
+                                        </div>
+                                    </div>
+                                    @* ... (Tương tự cho City, Country, Latitude, Longitude) ... *@
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label asp-for="City" class="form-label"></label>
+                                            <input asp-for="City" class="form-control-modern" />
+                                            <span asp-validation-for="City" class="text-danger validation-error"></span>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label asp-for="Country" class="form-label"></label>
+                                            <input asp-for="Country" class="form-control-modern" />
+                                            <span asp-validation-for="Country" class="text-danger validation-error"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label asp-for="Latitude" class="form-label"></label>
+                                            <input asp-for="Latitude" type="number" step="any" class="form-control-modern" />
+                                            <span asp-validation-for="Latitude" class="text-danger validation-error"></span>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label asp-for="Longitude" class="form-label"></label>
+                                            <input asp-for="Longitude" type="number" step="any" class="form-control-modern" />
+                                            <span asp-validation-for="Longitude" class="text-danger validation-error"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Giờ hoạt động -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <i class="fas fa-clock"></i>
+                            <h4>Giờ hoạt động</h4>
+                        </div>
+                        <div class="section-body">
+                            @* Phần current-info cho giờ hoạt động có thể hơi phức tạp để hiển thị giống hệt,
+                               bạn có thể chỉ hiển thị một tóm tắt hoặc lặp qua Model.OperatingHoursList
+                               và style nó khác đi một chút so với phần "new-info" *@
+                            <div class="current-info p-3 mb-3" style="background: #f8fafc; border-radius: 8px;">
+                                <div class="info-label mb-2"><i class="fas fa-info-circle"></i> Giờ hoạt động hiện tại</div>
+                                @if (Model.OperatingHoursList.Any(oh => oh.IsOpen))
+                                {
+                                    @foreach (var dayOp in Model.OperatingHoursList.Where(oh => oh.IsOpen).OrderBy(oh => oh.DayOfWeek))
+                                    {
+                                        <div class="d-flex justify-content-between small mb-1">
+                                            <span><strong>@dayOp.DayDisplayName:</strong></span>
+                                            <span>
+                                                @if (!string.IsNullOrEmpty(dayOp.OpenTime1) && !string.IsNullOrEmpty(dayOp.CloseTime1))
+                                                {
+                                                    @(dayOp.OpenTime1) <text>-</text> @(dayOp.CloseTime1)
+                                                }
+                                                @if (!string.IsNullOrEmpty(dayOp.OpenTime2) && !string.IsNullOrEmpty(dayOp.CloseTime2))
+                                                {
+                                                    <text>, </text> @(dayOp.OpenTime2) <text>-</text> @(dayOp.CloseTime2)
+                                                }
+                                            </span>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <p class="text-muted small">Chưa thiết lập giờ hoạt động.</p>
+                                }
+                            </div>
+
+                            <div class="new-info">
+                                <div class="info-label mb-3"><i class="fas fa-edit"></i> Cập nhật giờ hoạt động</div>
+                                @for (int i = 0; i < Model.OperatingHoursList.Count; i++)
+                                {
+                                    <div class="operating-hours-row">
+                                        <div class="day-name">@Model.OperatingHoursList[i].DayDisplayName</div>
+                                        <div class="toggle-switch @(Model.OperatingHoursList[i].IsOpen ? "active" : "")" onclick="toggleOperating(this)">
+                                            <input type="checkbox" asp-for="OperatingHoursList[i].IsOpen" class="d-none operating-day-toggle-hidden" />
+                                        </div>
+                                        <div class="time-input-group">
+                                            <input asp-for="OperatingHoursList[i].OpenTime1" type="time" class="time-input" disabled="@(!Model.OperatingHoursList[i].IsOpen)" />
+                                            <span>-</span>
+                                            <input asp-for="OperatingHoursList[i].CloseTime1" type="time" class="time-input" disabled="@(!Model.OperatingHoursList[i].IsOpen)" />
+                                        </div>
+                                        <div class="time-input-group">
+                                            <input asp-for="OperatingHoursList[i].OpenTime2" type="time" class="time-input" disabled="@(!Model.OperatingHoursList[i].IsOpen)" />
+                                            <span>-</span>
+                                            <input asp-for="OperatingHoursList[i].CloseTime2" type="time" class="time-input" disabled="@(!Model.OperatingHoursList[i].IsOpen)" />
+                                        </div>
+                                    </div>
+                                    <span asp-validation-for="OperatingHoursList[i].OpenTime1" class="text-danger validation-error"></span>
+                                    <span asp-validation-for="OperatingHoursList[i].CloseTime1" class="text-danger validation-error"></span>
+                                    <span asp-validation-for="OperatingHoursList[i].OpenTime2" class="text-danger validation-error"></span>
+                                    <span asp-validation-for="OperatingHoursList[i].CloseTime2" class="text-danger validation-error"></span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hình ảnh -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <i class="fas fa-images"></i>
+                            <h4>Hình ảnh</h4>
+                        </div>
+                        <div class="section-body">
+                            <div class="comparison-container">
+                                <div class="current-info">
+                                    <div class="info-label mb-2"><i class="fas fa-info-circle"></i> Hình ảnh hiện tại</div>
+                                    <div class="mb-3">
+                                        <strong>Ảnh đại diện:</strong>
+                                        @if (!string.IsNullOrEmpty(Model.CurrentMainImageUrl))
+                                        {
+                                            <img src="@Model.CurrentMainImageUrl" alt="Ảnh đại diện" class="image-preview mt-2 mb-2">
+                                        }
+                                        else
+                                        {
+                                            <div class="current-value"><span class="empty-value">Chưa có ảnh đại diện</span></div>
+                                        }
+                                    </div>
+                                    <div>
+                                        <strong>Ảnh khác:</strong>
+                                        @if (Model.CurrentOtherImages != null && Model.CurrentOtherImages.Any())
+                                        {
+                                            <div class="image-grid">
+                                                @for (int i = 0; i < Model.CurrentOtherImages.Count; i++)
+                                                {
+                                                    <div class="image-item">
+                                                        <img src="@Model.CurrentOtherImages[i].Url" alt="Ảnh khác">
+                                                        @* Nút xóa checkbox *@
+                                                        <div class="position-absolute top-0 end-0 p-1 bg-white rounded-circle shadow-sm" style="transform: translate(30%, -30%);">
+                                                            <input type="checkbox" asp-for="CurrentOtherImages[i].IsMarkedForDeletion" class="form-check-input delete-image-checkbox" title="Đánh dấu xóa" />
+                                                        </div>
+                                                        <input type="hidden" asp-for="CurrentOtherImages[i].Id" />
+                                                        <input type="hidden" asp-for="CurrentOtherImages[i].Url" />
+                                                        <input type="hidden" asp-for="CurrentOtherImages[i].CloudinaryPublicId" />
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="current-value mt-2"><span class="empty-value">Không có ảnh khác</span></div>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="new-info">
+                                    <div class="info-label mb-3"><i class="fas fa-edit"></i> Cập nhật hình ảnh</div>
+                                    <div class="mb-4">
+                                        <label asp-for="NewMainImageFile" class="form-label">Ảnh đại diện mới (nếu thay đổi)</label>
+                                        <div class="file-upload-area" onclick="document.getElementById('newMainImageFile').click()">
+                                            <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                                            <p class="mb-0 file-upload-text">Kéo thả hoặc nhấn để chọn ảnh</p>
+                                        </div>
+                                        <input asp-for="NewMainImageFile" type="file" id="newMainImageFile" accept="image/*" style="display: none;">
+                                        <span asp-validation-for="NewMainImageFile" class="text-danger validation-error"></span>
+                                    </div>
+                                    <div>
+                                        <label asp-for="NewOtherImageFiles" class="form-label">Thêm ảnh khác</label>
+                                        <div class="file-upload-area" onclick="document.getElementById('newOtherImageFiles').click()">
+                                            <i class="fas fa-photo-video fa-2x text-muted mb-2"></i>
+                                            <p class="mb-0 file-upload-text">Kéo thả hoặc nhấn để chọn nhiều ảnh</p>
+                                        </div>
+                                        <input asp-for="NewOtherImageFiles" type="file" id="newOtherImageFiles" accept="image/*" multiple style="display: none;">
+                                        <span asp-validation-for="NewOtherImageFiles" class="text-danger validation-error"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phân loại & Đặc điểm -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <i class="fas fa-tags"></i>
+                            <h4>Phân loại & Đặc điểm</h4>
+                        </div>
+                        <div class="section-body">
+                            @* Phần current-info cho CuisineTypes và Tags có thể hiển thị tương tự như Address *@
+                            <div class="current-info p-3 mb-3" style="background: #f8fafc; border-radius: 8px;">
+                                <div class="info-label mb-2"><i class="fas fa-info-circle"></i> Lựa chọn hiện tại</div>
+                                <div class="mb-2">
+                                    <strong>Loại hình ẩm thực:</strong>
+                                    @if (Model.SelectedCuisineTypeIds != null && Model.SelectedCuisineTypeIds.Any())
+                                    {
+                                        foreach (var cuisineId in Model.SelectedCuisineTypeIds)
+                                        {
+                                            var cuisineName = Model.AvailableCuisineTypes.FirstOrDefault(c => c.Id == cuisineId)?.Name;
+                                            <span class="badge bg-primary me-1">@cuisineName</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="empty-value">Chưa chọn</span>
+                                    }
+                                </div>
+                                <div>
+                                    <strong>Đặc điểm/Tiện ích:</strong>
+                                    @if (Model.SelectedTagIds != null && Model.SelectedTagIds.Any())
+                                    {
+                                        foreach (var tagId in Model.SelectedTagIds)
+                                        {
+                                            var tagName = Model.AvailableTags.FirstOrDefault(t => t.Id == tagId)?.Name;
+                                            <span class="badge bg-success me-1">@tagName</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="empty-value">Chưa chọn</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="new-info">
+                                <div class="info-label mb-3"><i class="fas fa-edit"></i> Cập nhật lựa chọn</div>
+                                <div class="mb-4">
+                                    <label class="form-label">Loại hình ẩm thực</label>
+                                    @if (Model.AvailableCuisineTypes != null && Model.AvailableCuisineTypes.Any())
+                                    {
+                                        <div class="checkbox-grid">
+                                            @for (int i = 0; i < Model.AvailableCuisineTypes.Count; i++)
+                                            {
+                                                <div class="checkbox-item">
+                                                    <input type="checkbox" name="SelectedCuisineTypeIds" value="@Model.AvailableCuisineTypes[i].Id"
+                                                           id="cuisine-@Model.AvailableCuisineTypes[i].Id"
+                                                           checked="@Model.AvailableCuisineTypes[i].IsSelected" />
+                                                    <label for="cuisine-@Model.AvailableCuisineTypes[i].Id">@Model.AvailableCuisineTypes[i].Name</label>
+                                                </div>
+                                            }
+                                        </div>
+                                        <span asp-validation-for="SelectedCuisineTypeIds" class="text-danger validation-error"></span>
+                                    }
+                                </div>
+                                <div>
+                                    <label class="form-label">Đặc điểm/Tiện ích</label>
+                                    @if (Model.AvailableTags != null && Model.AvailableTags.Any())
+                                    {
+                                        <div class="checkbox-grid">
+                                            @for (int i = 0; i < Model.AvailableTags.Count; i++)
+                                            {
+                                                <div class="checkbox-item">
+                                                    <input type="checkbox" name="SelectedTagIds" value="@Model.AvailableTags[i].Id"
+                                                           id="tag-@Model.AvailableTags[i].Id"
+                                                           checked="@Model.AvailableTags[i].IsSelected" />
+                                                    <label for="tag-@Model.AvailableTags[i].Id">@Model.AvailableTags[i].Name</label>
+                                                </div>
+                                            }
+                                        </div>
+                                        <span asp-validation-for="SelectedTagIds" class="text-danger validation-error"></span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Action buttons -->
+                    <div class="action-buttons">
+                        <button type="submit" class="btn-modern btn-primary-modern">
+                            <i class="fas fa-save me-2"></i>
+                            Lưu Thay Đổi
+                        </button>
+                        <a asp-action="MyRestaurants" asp-controller="Business" class="btn-modern btn-secondary-modern">
+                            <i class="fas fa-times me-2"></i>
+                            Hủy bỏ
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Hàm toggle cho giờ hoạt động (sử dụng checkbox ẩn để binding)
+    function toggleOperating(toggleElement) {
+        const row = toggleElement.closest('.operating-hours-row'); // Đảm bảo class này tồn tại trên HTML
+        if (!row) return;
+
+        const timeInputs = row.querySelectorAll('.time-input'); // Đảm bảo class này tồn tại trên input time
+        const hiddenCheckbox = row.querySelector('.operating-day-toggle-hidden'); // Checkbox ẩn bind với IsOpen
+
+        toggleElement.classList.toggle('active');
+        const isActive = toggleElement.classList.contains('active');
+
+        if (hiddenCheckbox) {
+            hiddenCheckbox.checked = isActive;
+            // Trigger sự kiện change cho validation nếu cần (jQuery ví dụ)
+            // $(hiddenCheckbox).trigger('change');
+            // Hoặc với vanilla JS:
+            const changeEvent = new Event('change', { bubbles: true });
+            hiddenCheckbox.dispatchEvent(changeEvent);
+        }
+
+        timeInputs.forEach(input => {
+            input.disabled = !isActive;
+            if (!isActive) {
+                input.value = '';
+            }
+        });
+    }
+
+    // Hàm xử lý khi người dùng tick vào checkbox xóa ảnh hiện có
+    function handleImageDeletionCheckbox(checkboxElement) {
+        const imageItemDiv = checkboxElement.closest('.image-item-container'); // Container bao quanh ảnh và checkbox xóa
+        if (imageItemDiv) {
+            if (checkboxElement.checked) {
+                imageItemDiv.style.opacity = '0.5';
+                // Thêm class để có thể style border hoặc overlay nếu muốn
+                imageItemDiv.classList.add('marked-for-deletion');
+            } else {
+                imageItemDiv.style.opacity = '1';
+                imageItemDiv.classList.remove('marked-for-deletion');
+            }
+        }
+    }
+
+    // Xử lý hiển thị tên file đã chọn cho input file
+    function setupFileInputText(fileInputId) {
+        const fileInput = document.getElementById(fileInputId);
+        if (!fileInput) return;
+
+        const uploadArea = fileInput.closest('.file-upload-area');
+        if (!uploadArea) return;
+
+        const textElement = uploadArea.querySelector('.file-upload-text');
+        const iconElement = uploadArea.querySelector('i'); // Lấy thẻ <i>
+        const defaultText = textElement ? (textElement.dataset.defaultText || "Kéo thả hoặc nhấn để chọn file") : "Kéo thả hoặc nhấn để chọn file";
+        const defaultIconClasses = iconElement ? iconElement.className : ""; // Lưu class gốc của icon
+
+        if(textElement && !textElement.dataset.defaultText) { // Lưu text mặc định lần đầu
+             textElement.dataset.defaultText = textElement.textContent;
+        }
+
+        fileInput.addEventListener('change', function(e) {
+            if (!textElement || !iconElement) return;
+
+            if (this.files && this.files.length > 0) {
+                let fileNames = Array.from(this.files).map(f => f.name).join(', ');
+                if (fileNames.length > 40) fileNames = fileNames.substring(0, 37) + "...";
+                textElement.textContent = "Đã chọn: " + fileNames;
+                iconElement.className = 'fas fa-check-circle fa-2x text-success mb-2'; // Đổi icon
+            } else {
+                textElement.textContent = defaultText;
+                iconElement.className = defaultIconClasses; // Khôi phục icon gốc
+            }
+        });
+    }
+
+    // Drag and drop functionality
+    function setupDragAndDrop(fileInputId) {
+        const fileInput = document.getElementById(fileInputId);
+        if (!fileInput) return;
+        const uploadArea = fileInput.closest('.file-upload-area');
+        if (!uploadArea) return;
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => uploadArea.classList.add('dragover'), false);
+        });
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('dragover'), false);
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            const dt = e.dataTransfer;
+            if (dt.files && dt.files.length > 0) {
+                fileInput.files = dt.files;
+                const event = new Event('change', { bubbles: true });
+                fileInput.dispatchEvent(event);
+            }
+        });
+    }
+
+    // DOMContentLoaded: Chạy script sau khi toàn bộ HTML đã được tải và phân tích cú pháp
+    document.addEventListener('DOMContentLoaded', function() {
+        // Khởi tạo trạng thái ban đầu cho các toggle giờ hoạt động
+        document.querySelectorAll('.operating-day-toggle-hidden').forEach(hiddenCheckbox => {
+            const row = hiddenCheckbox.closest('.operating-hours-row');
+            if (!row) return;
+            const toggleSwitchDiv = row.querySelector('.toggle-switch'); // Cần class này trên div toggle
+            const timeInputs = row.querySelectorAll('.time-input');
+            const isActive = hiddenCheckbox.checked;
+
+            if (toggleSwitchDiv) {
+                if (isActive) toggleSwitchDiv.classList.add('active');
+                else toggleSwitchDiv.classList.remove('active');
+            }
+            timeInputs.forEach(input => {
+                input.disabled = !isActive;
+                if (!isActive) input.value = '';
+            });
+        });
+
+        // Gắn sự kiện cho các toggle switch (div)
+        document.querySelectorAll('.toggle-switch').forEach(toggleElement => {
+            toggleElement.addEventListener('click', function() {
+                toggleOperating(this);
+            });
+        });
+
+        // Gắn sự kiện cho các checkbox xóa ảnh hiện có
+        document.querySelectorAll('.delete-image-checkbox').forEach(checkbox => {
+            handleImageDeletionCheckbox(checkbox); // Set trạng thái ban đầu
+            checkbox.addEventListener('change', function() {
+                handleImageDeletionCheckbox(this);
+            });
+        });
+
+        // Khởi tạo cho các khu vực upload file (sử dụng ID của các input asp-for)
+        setupFileInputText('NewMainImageFile'); // ID của <input asp-for="NewMainImageFile" />
+        setupDragAndDrop('NewMainImageFile');
+        setupFileInputText('NewOtherImageFiles'); // ID của <input asp-for="NewOtherImageFiles" />
+        setupDragAndDrop('NewOtherImageFiles');
+
+        // Gắn sự kiện click cho checkbox-item để toggle checkbox con
+        document.querySelectorAll('.checkbox-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (e.target.type !== 'checkbox') { // Chỉ toggle nếu click không phải vào chính checkbox
+                    const checkbox = this.querySelector('input[type="checkbox"]');
+                    if (checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                        // Có thể cần trigger 'change' event cho checkbox nếu có logic khác phụ thuộc vào nó
+                        // const changeEvent = new Event('change', { bubbles: true });
+                        // checkbox.dispatchEvent(changeEvent);
+                    }
+                }
+            });
+        });
+
+        // Xử lý khi submit form
+        const form = document.getElementById('editRestaurantForm'); // Đảm bảo form có id="editRestaurantForm"
+        if (form) {
+            const submitBtn = form.querySelector('button[type="submit"].btn-primary-modern');
+            if (submitBtn) {
+                form.addEventListener('submit', function(e) {
+                    // Nếu bạn KHÔNG dùng AJAX (ví dụ jquery-ajax-unobtrusive) cho form này,
+                    // thì bạn KHÔNG NÊN gọi e.preventDefault().
+                    // Nếu bạn dùng AJAX, bạn SẼ gọi e.preventDefault() và tự xử lý submit.
+
+                    // Dòng này chỉ để hiển thị loading cho submit truyền thống, nó sẽ reset khi trang load lại
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang lưu...';
+                    submitBtn.disabled = true;
+
+                    // Form sẽ submit lên server theo cách thông thường nếu không có e.preventDefault()
+                });
+            }
+        }
+
+        // Ripple effect (giữ nguyên hoặc điều chỉnh)
+        document.querySelectorAll('.btn-modern, .btn-secondary-modern, .btn-action').forEach(button => {
+            button.addEventListener('click', function (e) {
+                // Logic tạo ripple
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple'); // Cần class 'ripple' được định nghĩa trong CSS
+                this.appendChild(ripple);
+
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = e.clientX - rect.left - (size / 2) + 'px';
+                ripple.style.top = e.clientY - rect.top - (size / 2) + 'px';
+
+                ripple.addEventListener('animationend', () => {
+                    ripple.remove();
+                });
+            });
+        });
+
+        // Thêm CSS cho ripple effect nếu chưa có trong file CSS chính
+        // (Cách tốt hơn là đặt nó trong file CSS)
+        if (!document.getElementById('ripple-effect-style')) {
+            const rippleStyle = document.createElement('style');
+            rippleStyle.id = 'ripple-effect-style';
+            rippleStyle.textContent = `
+                .btn-modern, .btn-secondary-modern, .btn-action {
+                    position: relative;
+                    overflow: hidden;
+                }
+                .ripple {
+                    position: absolute;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.4); /* Màu ripple có thể điều chỉnh */
+                    transform: scale(0);
+                    animation: ripple-animation 0.6s linear;
+                    pointer-events: none; /* Quan trọng */
+                }
+                @@keyframes ripple-animation { /* Dùng @@ nếu script này nằm trong file .cshtml */
+                    to {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(rippleStyle);
+        }
+    });
+</script>
+}

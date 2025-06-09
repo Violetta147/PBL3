@@ -1,0 +1,160 @@
+﻿@using PBL3.ViewModel
+@* File: Views/Account/_RegisterModalPartial.cshtml *@
+@model RegisterViewModel
+
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header border-0 justify-content-end">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body px-4">
+            <div class="text-center mb-4">
+                <h3 class="fw-bold">Đăng ký tài khoản FishLoot</h3>
+                <p class="text-muted">Kết nối với các doanh nghiệp địa phương tuyệt vời</p>
+            </div>
+
+            @* Hiển thị lỗi từ TempData (nếu có lỗi từ ExternalLoginCallback hoặc các bước khác) *@
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger" role="alert">
+                    @TempData["ErrorMessage"]
+                </div>
+            }
+            @if (TempData["ExternalLoginErrors"] != null)
+            {
+                <div class="alert alert-danger" role="alert">
+                    <strong>Lỗi đăng ký tài khoản bên ngoài:</strong>
+                    <ul>
+                        @foreach (var error in (IEnumerable<string>)TempData["ExternalLoginErrors"])
+                        {
+                            <li>@error</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <!-- Google Registration Button -->
+            <form asp-controller="Account" asp-action="ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="mb-3" id="googleRegisterForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="provider" value="Google" />
+                <button type="submit" class="btn w-100 position-relative text-white py-2" style="background-color: #4285F4;" title="Đăng ký bằng tài khoản Google của bạn">
+                    <img src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png" alt="Google" class="position-absolute bg-white p-1 rounded-circle" style="left: 12px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px;">
+                    <span class="fw-medium">Tiếp tục với Google</span>
+                </button>
+            </form>
+
+            <!-- Facebook Registration Button -->
+            
+            <form asp-controller="Account" asp-action="ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="mb-3" id="facebookRegisterForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="provider" value="Facebook" />
+                <button type="submit" class="btn w-100 position-relative text-white py-2" style="background-color: #1877F2;" title="Đăng ký bằng tài khoản Facebook của bạn">
+                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Facebook_Logo_%282019%29.png/40px-Facebook_Logo_%282019%29.png" alt="Facebook" class="position-absolute bg-white p-1 rounded-circle" style="left: 12px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px;">
+                    <span class="fw-medium">Tiếp tục với Facebook</span>
+                </button>
+            </form>
+            
+
+            <!-- Divider -->
+            <div class="d-flex align-items-center my-3">
+                <div class="flex-grow-1 border-bottom"></div>
+                <div class="mx-3 text-muted small">HOẶC ĐĂNG KÝ BẰNG EMAIL</div>
+                <div class="flex-grow-1 border-bottom"></div>
+            </div>
+
+            <!-- Form đăng ký bằng Email/Password -->
+            <form id="registerFormModal" asp-controller="Account" asp-action="Register" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="ReturnUrl" />
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger small p-2" role="alert"></div>
+
+                @* Nếu RegisterViewModel có UserName, thêm trường nhập UserName ở đây *@
+                @*
+                <div class="mb-3">
+                    <label asp-for="UserName" class="form-label small fw-medium"></label>
+                    <input asp-for="UserName" class="form-control form-control-sm" placeholder="Tên người dùng" />
+                    <span asp-validation-for="UserName" class="text-danger small"></span>
+                </div>
+                *@
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label small fw-medium"></label>
+                    <input asp-for="Email" class="form-control form-control-sm" placeholder="your@email.com" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label small fw-medium"></label>
+                    <input asp-for="Password" type="password" class="form-control form-control-sm" placeholder="Mật khẩu" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ConfirmPassword" class="form-label small fw-medium"></label>
+                    <input asp-for="ConfirmPassword" type="password" class="form-control form-control-sm" placeholder="Xác nhận mật khẩu" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                </div>
+
+                <!-- Terms and Privacy Policy Notice -->
+                <div class="mb-3">
+                    <p class="small text-muted" style="font-size: 0.75rem;">
+                        Bằng việc tiếp tục, bạn đồng ý với <a href="#" class="text-decoration-none">Điều khoản Dịch vụ</a> của FishLoot và công nhận <a href="#" class="text-decoration-none">Chính sách Bảo mật</a>.
+                    </p>
+                </div>
+
+                <!-- Sign Up Button -->
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-danger w-100 fw-medium">Đăng ký</button>
+                </div>
+            </form>
+
+            <!-- Login option -->
+            <div class="text-center mt-4 mb-3 border-top pt-3">
+                <p class="mb-0 small">
+                    Đã có tài khoản FishLoot? <a href="#" id="switchToLoginModalFromRegister" class="text-decoration-none text-primary fw-medium">Đăng nhập</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Script để parse validation cho form email/password (nếu jquery.validate.unobtrusive.js đã được tải đúng) *@
+@* KHUYẾN NGHỊ: Chuyển logic này ra site.js và gọi sau khi modal được load bằng AJAX *@
+<script>
+    $(function () {
+        var form = $("#registerFormModal"); // ID của form đăng ký
+        if (form.length && typeof $.validator !== 'undefined' && typeof $.validator.unobtrusive !== 'undefined') {
+            form.removeData('validator');
+            form.removeData('unobtrusiveValidation');
+            $.validator.unobtrusive.parse(form);
+            console.log("Validation parsed for: #registerFormModal from partial.");
+        } else {
+            if (!form.length) { console.warn("#registerFormModal not found for validation parsing in partial."); }
+            if (typeof $.validator === 'undefined' || typeof $.validator.unobtrusive === 'undefined') {
+                console.warn("jQuery Validate or Unobtrusive not loaded, cannot parse #registerFormModal in partial.");
+            }
+        }
+
+        // Xử lý click link "Log in" để đóng modal đăng ký và mở modal đăng nhập
+        $('#switchToLoginModalFromRegister').on('click', function(e) {
+            e.preventDefault();
+            var registerModalElement = document.getElementById('registerModalInstance');
+            if (registerModalElement) {
+                var registerModalInstance = bootstrap.Modal.getInstance(registerModalElement);
+                if (registerModalInstance) {
+                    // Đăng ký sự kiện hidden một lần để mở modal kia sau khi modal này đóng hoàn toàn
+                    $(registerModalElement).one('hidden.bs.modal', function () {
+                        $('#loginModalButton').trigger('click'); // ID của nút mở modal đăng nhập
+                    });
+                    registerModalInstance.hide();
+                } else {
+                     // Fallback nếu không tìm thấy instance, có thể do lỗi trước đó
+                     $('#loginModalButton').trigger('click');
+                }
+            } else {
+                 $('#loginModalButton').trigger('click');
+            }
+        });
+    });
+</script>

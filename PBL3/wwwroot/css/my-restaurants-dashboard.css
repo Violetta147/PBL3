@@ -1,0 +1,463 @@
+﻿/* wwwroot/css/my-restaurants-dashboard.css */
+
+/* Biến màu và các style chung có thể lấy từ file CSS trước đó hoặc site.css */
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --text-primary: #2d3748;
+    --text-secondary: #718096;
+    --border-color: #e2e8f0;
+    --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f8f9fa; /* Màu nền nhẹ nhàng hơn cho dashboard */
+    color: var(--text-primary);
+}
+
+.dashboard-container {
+    /* Container chính có thể không cần style đặc biệt nếu dùng container-fluid */
+}
+
+/* Sidebar Styling */
+.sidebar {
+    /* background-color: #ffffff; /* Có thể đổi màu nền sidebar */
+    /* border-right: 1px solid var(--border-color); */
+    padding-top: 1.5rem !important; /* Thêm !important nếu Bootstrap ghi đè */
+}
+
+@media (min-width: 768px) { /* md breakpoint */
+    .vh-100-md {
+        height: calc(100vh - 56px - YOUR_NAVBAR_HEIGHT_IF_FIXED_TOP); /* Điều chỉnh YOUR_NAVBAR_HEIGHT */
+        /* Hoặc đơn giản là height: 100vh; và xử lý overflow */
+        /* Nếu navbar của bạn là fixed-top, bạn cần trừ đi chiều cao của nó */
+    }
+    .position-sticky-md {
+        position: -webkit-sticky;
+        position: sticky;
+        top: YOUR_NAVBAR_HEIGHT_IF_FIXED_TOP; /* Ví dụ: 56px nếu navbar của bạn cao 56px và fixed */
+        /* Hoặc top: 0; nếu không có navbar fixed */
+        z-index: 1020; /* Đảm bảo nó nằm trên các element khác */
+    }
+}
+
+
+.sidebar-sticky {
+    /* Styles cho nội dung bên trong sidebar để nó dính lại khi cuộn */
+}
+
+.sidebar-heading {
+    font-size: 0.75rem;
+    letter-spacing: .05rem;
+}
+
+.sidebar .nav-item {
+    margin-bottom: 0.5rem;
+}
+
+.stat-item {
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease-in-out;
+    box-shadow: var(--shadow-light);
+}
+
+.stat-item:hover {
+    background-color: #ffffff;
+    transform: translateX(5px);
+    box-shadow: var(--shadow-medium);
+}
+
+.stat-item .stat-icon {
+    font-size: 1.5rem; /* Kích thước icon trong stat item */
+    margin-right: 1rem;
+    width: 40px; /* Kích thước cố định cho icon container */
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: var(--primary-gradient); /* Nền icon */
+    color: white;
+}
+
+.stat-item .stat-content .stat-number {
+    font-size: 1.5rem; /* Kích thước số */
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.stat-item .stat-content .stat-label {
+    font-size: 0.8rem; /* Kích thước nhãn */
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+
+/* Main Content Area Styling */
+main.col-md-8 { /* Tên class có thể khác tùy vào bạn đặt */
+    /* background-color: #ffffff; */ /* Có thể thêm nền cho khu vực nội dung */
+    /* border-radius: 12px; */
+    /* box-shadow: var(--shadow-light); */
+    /* padding: 2rem !important; */
+}
+
+.page-title { /* Điều chỉnh lại cho phù hợp với dashboard header */
+    font-size: 2rem;
+    font-weight: 700;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.welcome-text {
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
+
+/* Restaurant Card Styling (Layout ngang - giữ nguyên hoặc điều chỉnh từ CSS trước đó) */
+.restaurant-list-horizontal {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.restaurant-card {
+    background: var(--card-bg); /* Sử dụng biến màu nền card */
+    backdrop-filter: blur(10px); /* Giảm blur một chút nếu card-bg là màu đục */
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+    border: 1px solid var(--border-color); /* Sử dụng biến màu border */
+    transition: var(--transition);
+    display: flex;
+    flex-direction: row;
+}
+
+    .restaurant-card:hover {
+        transform: translateY(-6px); /* Hiệu ứng nổi bật hơn chút */
+        box-shadow: var(--shadow-medium);
+    }
+
+.restaurant-image-container {
+    flex-shrink: 0;
+    width: 220px; /* Chiều rộng cố định cho ảnh, có thể điều chỉnh */
+    height: auto; /* Để chiều cao tự động theo tỉ lệ ảnh hoặc nội dung */
+    min-height: 180px; /* Chiều cao tối thiểu để card không quá thấp nếu ảnh nhỏ */
+    overflow: hidden; /* Đảm bảo ảnh không tràn ra ngoài nếu có bo góc */
+    /* border-top-left-radius: 16px; */ /* Bo góc nếu bạn muốn ảnh cũng bo theo card */
+    /* border-bottom-left-radius: 16px; */
+}
+
+.restaurant-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block; /* Loại bỏ khoảng trắng thừa dưới ảnh */
+}
+
+.restaurant-card .card-body { /* card-body của Bootstrap, nhưng chúng ta style lại */
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Quan trọng để chiếm hết không gian còn lại */
+}
+
+.restaurant-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+}
+
+.restaurant-address {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem; /* Giảm gap một chút */
+    margin-bottom: 0.75rem; /* Giảm margin */
+}
+
+    .restaurant-address i {
+        color: var(--primary-gradient); /* Cho icon màu gradient khó, dùng màu đơn */
+        color: #667eea;
+    }
+
+
+.status-badge {
+    display: inline-flex; /* Cho phép nó chỉ chiếm độ rộng nội dung */
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.8rem; /* Làm badge nhỏ gọn hơn */
+    border-radius: 50px;
+    font-size: 0.8rem; /* Chữ nhỏ hơn */
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    /* border: none; Bỏ border mặc định của các class status-* nếu bạn muốn */
+}
+
+    .status-badge i { /* Style cho icon trong badge */
+        font-size: 0.7rem; /* Icon nhỏ hơn */
+    }
+
+.status-open {
+    background: rgba(76, 175, 80, 0.15);
+    color: #1f6423; /* border-color: rgba(76, 175, 80, 0.3); */
+}
+
+.status-closed {
+    background: rgba(220, 53, 69, 0.15);
+    color: #a52834; /* border-color: rgba(220, 53, 69, 0.3); */
+}
+
+.status-temp-closed {
+    background: rgba(255, 193, 7, 0.15);
+    color: #856000; /* border-color: rgba(255, 193, 7, 0.3); */
+}
+
+
+.restaurant-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color); /* Thêm đường kẻ phân cách nhẹ */
+    font-size: 0.875rem;
+}
+
+.rating-info {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem; /* Giảm gap */
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.rating-star {
+    color: #ffc107; /* Màu vàng cho sao */
+}
+
+.created-date {
+    font-size: 0.8rem; /* Chữ nhỏ hơn */
+    color: var(--text-secondary);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap; /* Cho phép xuống dòng nếu không đủ chỗ */
+    margin-top: auto; /* Quan trọng: Đẩy các nút xuống dưới cùng của card-body */
+}
+
+.btn-action {
+    /* flex: 1; Bỏ để các nút có độ rộng tự nhiên */
+    padding: 0.5rem 0.9rem; /* Kích thước nút vừa phải */
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500; /* Giảm độ đậm một chút */
+    text-decoration: none;
+    text-align: center;
+    transition: var(--transition);
+    border: 1px solid transparent; /* Border ẩn ban đầu */
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+    .btn-action i {
+        font-size: 0.9em;
+    }
+
+.btn-view {
+    background-color: rgba(33, 150, 243, 0.1);
+    color: #0d6efd;
+    border-color: rgba(33, 150, 243, 0.3);
+}
+
+    .btn-view:hover {
+        background-color: #0d6efd;
+        color: white;
+        box-shadow: var(--shadow-light);
+    }
+
+.btn-edit {
+    background-color: rgba(108, 117, 125, 0.1);
+    color: #495057;
+    border-color: rgba(108, 117, 125, 0.3);
+}
+
+    .btn-edit:hover {
+        background-color: #5c636a;
+        color: white;
+        box-shadow: var(--shadow-light);
+    }
+
+.btn-menu {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: #157347;
+    border-color: rgba(25, 135, 84, 0.3);
+}
+
+    .btn-menu:hover {
+        background-color: #198754;
+        color: white;
+        box-shadow: var(--shadow-light);
+    }
+
+
+/* Responsive */
+@@media (max-width: 991px) { /* lg breakpoint */
+    .restaurant-image-container {
+        width: 180px; /* Giảm chiều rộng ảnh trên tablet */
+        min-height: 150px;
+    }
+}
+
+@@media (max-width: 767px) { /* md breakpoint */
+    .restaurant-card {
+        flex-direction: column; /* Chuyển về layout dọc */
+    }
+
+    .restaurant-image-container {
+        width: 100%; /* Ảnh chiếm full width */
+        height: 200px; /* Chiều cao cố định */
+        border-radius: 16px 16px 0 0; /* Bo góc trên cho ảnh */
+    }
+
+    .restaurant-image {
+        border-radius: 16px 16px 0 0;
+    }
+
+    .restaurant-card .card-body {
+        padding: 1rem; /* Giảm padding cho card-body trên mobile */
+    }
+
+    .action-buttons {
+        /* flex-direction: column; Có thể không cần nếu nút đã nhỏ */
+        /* gap: 0.5rem; */
+    }
+}
+
+/* Floating Elements and Pulse (Giữ nguyên từ style mẫu của bạn) */
+.pulse-animation {
+    animation: pulse 2s infinite;
+}
+
+@@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.floating-elements {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.floating-circle {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    animation: float 6s ease-in-out infinite;
+}
+
+    .floating-circle:nth-child(1) {
+        width: 80px;
+        height: 80px;
+        top: 10%;
+        left: 10%;
+        animation-delay: 0s;
+    }
+
+    .floating-circle:nth-child(2) {
+        width: 120px;
+        height: 120px;
+        top: 60%;
+        right: 10%;
+        animation-delay: 2s;
+    }
+
+    .floating-circle:nth-child(3) {
+        width: 60px;
+        height: 60px;
+        bottom: 20%;
+        left: 20%;
+        animation-delay: 4s;
+    }
+
+@@keyframes float {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-20px) rotate(180deg);
+    }
+}
+
+/* Ripple Effect (Giữ nguyên từ style mẫu của bạn, hoặc bạn có thể bỏ nếu không thích) */
+.btn-modern, .btn-action {
+    position: relative; /* Đã có trong .btn-modern, đảm bảo .btn-action cũng có nếu cần ripple */
+    overflow: hidden; /* Đã có trong .btn-modern */
+}
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(0);
+    animation: ripple-animation 0.6s linear;
+    pointer-events: none;
+}
+
+@@keyframes ripple-animation {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* Ripple effect (Giữ nguyên từ style mẫu của bạn) */
+.btn-modern, .btn-action {
+    position: relative;
+    overflow: hidden;
+}
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(0);
+    animation: ripple-animation 0.6s linear;
+    pointer-events: none;
+}
+@keyframes ripple-animation { /* Dùng @ bình thường trong file .css */
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}

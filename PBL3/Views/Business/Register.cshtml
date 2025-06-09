@@ -1,0 +1,538 @@
+﻿@using PBL3.ViewModel.Restaurant
+@model RegisterRestaurantViewModel
+@{
+    ViewData["Title"] = "Đăng ký Doanh nghiệp của bạn";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // Đảm bảo layout của bạn có jQuery và Bootstrap JS
+}
+
+@* Phần CSS trong @section Styles giữ nguyên, không cần thay đổi *@
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta3/css/bootstrap-select.min.css">
+    <style>
+        /* Toàn bộ CSS của bạn ở đây... (giữ nguyên) */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Giảm độ đậm của shadow một chút */
+            --card-hover-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+            --border-radius: 16px; /* Giữ nguyên */
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            background-color: #f4f7f6;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+
+        .main-container {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            margin: 2rem auto;
+            padding: 2.5rem 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .main-container::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 5px;
+                background: var(--primary-gradient);
+            }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .page-title {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .page-subtitle {
+            color: #555;
+            font-size: 1.15rem;
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+            margin-bottom: 2.5rem;
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid #e9ecef;
+        }
+
+            .form-card:hover {
+                box-shadow: var(--card-hover-shadow);
+                transform: translateY(-3px);
+            }
+
+        .card-header-modern {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 1.25rem 1.5rem;
+            border: none;
+            position: relative;
+        }
+
+            .card-header-modern h4 {
+                margin: 0;
+                font-weight: 600;
+                font-size: 1.2rem;
+            }
+
+            .card-header-modern i {
+                margin-right: 0.6rem;
+                font-size: 1.1rem;
+            }
+
+        .card-body-modern {
+            padding: 1.5rem 2rem;
+        }
+
+        .form-label-modern {
+            font-weight: 600;
+            color: #343a40;
+            margin-bottom: 0.6rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control-modern {
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: #fff;
+            color: #212529;
+        }
+
+            .form-control-modern:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+                background-color: #fff;
+                outline: none;
+            }
+
+            .form-control-modern::placeholder {
+                color: #6c757d;
+                opacity: 1;
+            }
+
+        .input-group-modern .input-group-text {
+            background: #e9ecef;
+            color: #495057;
+            border: 1px solid #ced4da;
+            border-left: 0;
+            font-weight: 500;
+            border-radius: 0 8px 8px 0;
+            padding: 0.75rem 1rem;
+        }
+
+        .input-group > .form-control-modern:not(:last-child) {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .input-group > .form-control-modern:not(:first-child) {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        .operating-hours-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e9ecef;
+        }
+        /* ... các CSS khác giữ nguyên ... */
+        .validation-error {
+            color: #dc3545;
+            font-size: 0.875em;
+            display: block;
+            margin-top: .25rem;
+        }
+    </style>
+}
+
+@if (User.Identity.IsAuthenticated)
+{
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-xl-10 col-lg-12">
+                <div class="main-container">
+                    <div class="page-header">
+                        <h1 class="page-title">@ViewData["Title"]</h1>
+                        <p class="page-subtitle">Cung cấp thông tin chi tiết để doanh nghiệp của bạn nổi bật trên nền tảng của chúng tôi.</p>
+                    </div>
+
+                    @* SỬA LẠI FORM TAG HELPER *@
+                    <form asp-controller="Business" asp-action="Register" method="post" enctype="multipart/form-data">
+                        @* ValidationSummary sẽ hiển thị các lỗi không thuộc về một trường cụ thể nào (Model-level errors) *@
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger alert-modern mb-4" role="alert"></div>
+
+                        <!-- Basic Information Card -->
+                        <div class="form-card">
+                            <div class="card-header-modern">
+                                <h4><i class="fas fa-store"></i>Thông tin Cơ bản Nhà hàng</h4>
+                            </div>
+                            <div class="card-body-modern">
+                                <div class="row">
+                                    <div class="col-12 mb-4">
+                                        @* SỬA: Dùng Tag Helpers *@
+                                        <label asp-for="Name" class="form-label-modern"></label>
+                                        <input asp-for="Name" class="form-control form-control-modern" placeholder="Ví dụ: Quán Ăn Gia Đình Việt">
+                                        <span asp-validation-for="Name" class="validation-error"></span>
+                                    </div>
+
+                                    <div class="col-12 mb-4">
+                                        @* SỬA: Dùng Tag Helpers *@
+                                        <label asp-for="Description" class="form-label-modern"></label>
+                                        <textarea asp-for="Description" class="form-control form-control-modern" rows="4" placeholder="Mô tả ngắn gọn về nhà hàng, các món đặc sắc, không gian..."></textarea>
+                                        <span asp-validation-for="Description" class="validation-error"></span>
+                                    </div>
+
+                                    <div class="col-md-6 mb-4">
+                                        @* SỬA: Dùng Tag Helpers *@
+                                        <label asp-for="PhoneNumber" class="form-label-modern"></label>
+                                        <input asp-for="PhoneNumber" class="form-control form-control-modern" placeholder="Ví dụ: 090xxxxxxx">
+                                        <span asp-validation-for="PhoneNumber" class="validation-error"></span>
+                                    </div>
+
+                                    <div class="col-md-6 mb-4">
+                                        @* SỬA: Dùng Tag Helpers *@
+                                        <label asp-for="Website" class="form-label-modern"></label>
+                                        <input asp-for="Website" class="form-control form-control-modern" placeholder="Ví dụ: https://nhahangcuaban.com">
+                                        <span asp-validation-for="Website" class="validation-error"></span>
+                                    </div>
+
+                                    <div class="col-md-6 mb-4">
+                                        @* SỬA: Dùng Tag Helpers *@
+                                        <label asp-for="MinTypicalPrice" class="form-label-modern"></label>
+                                        <div class="input-group">
+                                            <input asp-for="MinTypicalPrice" class="form-control form-control-modern" placeholder="Giá thấp nhất">
+                                            <span class="input-group-text input-group-modern">VNĐ</span>
+                                        </div>
+                                        <span asp-validation-for="MinTypicalPrice" class="validation-error"></span>
+                                    </div>
+
+                                    <div class="col-md-6 mb-4">
+                                        @* SỬA: Dùng Tag Helpers *@
+                                        <label asp-for="MaxTypicalPrice" class="form-label-modern"></label>
+                                        <div class="input-group">
+                                            <input asp-for="MaxTypicalPrice" class="form-control form-control-modern" placeholder="Giá cao nhất">
+                                            <span class="input-group-text input-group-modern">VNĐ</span>
+                                        </div>
+                                        <span asp-validation-for="MaxTypicalPrice" class="validation-error"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Address Information Card -->
+                        <div class="form-card">
+                            <div class="card-header-modern">
+                                <h4><i class="fas fa-map-marker-alt"></i>Địa chỉ Nhà hàng</h4>
+                            </div>
+                            <div class="card-body-modern">
+                                <div class="row">
+                                    <div class="col-12 mb-4">
+                                        @* SỬA: Dùng Tag Helpers *@
+                                        <label asp-for="AddressLine1" class="form-label-modern"></label>
+                                        <input asp-for="AddressLine1" class="form-control form-control-modern" placeholder="Số nhà, tên đường, tòa nhà...">
+                                        <span asp-validation-for="AddressLine1" class="validation-error"></span>
+                                    </div>
+
+                                    <div class="col-md-6 mb-4">
+                                        @* SỬA: Dùng Tag Helpers *@
+                                        <label asp-for="Ward" class="form-label-modern"></label>
+                                        <input asp-for="Ward" class="form-control form-control-modern" placeholder="Ví dụ: Phường Bến Nghé">
+                                        <span asp-validation-for="Ward" class="validation-error"></span>
+                                    </div>
+
+                                    <div class="col-md-6 mb-4">
+                                        @* SỬA: Dùng Tag Helpers *@
+                                        <label asp-for="District" class="form-label-modern"></label>
+                                        <input asp-for="District" class="form-control form-control-modern" placeholder="Ví dụ: Quận 1">
+                                        <span asp-validation-for="District" class="validation-error"></span>
+                                    </div>
+
+                                    <div class="col-md-6 mb-4">
+                                        @* SỬA: Dùng Tag Helpers *@
+                                        <label asp-for="City" class="form-label-modern"></label>
+                                        <input asp-for="City" class="form-control form-control-modern" placeholder="Ví dụ: TP. Hồ Chí Minh">
+                                        <span asp-validation-for="City" class="validation-error"></span>
+                                    </div>
+
+                                    <div class="col-md-6 mb-4">
+                                        @* SỬA: Dùng Tag Helpers *@
+                                        <label asp-for="Country" class="form-label-modern"></label>
+                                        <input asp-for="Country" class="form-control form-control-modern">
+                                        <span asp-validation-for="Country" class="validation-error"></span>
+                                    </div>
+                                </div>
+                                <div class="alert alert-secondary mt-3" role="alert" style="font-size: 0.9rem;">
+                                    <i class="fas fa-info-circle me-1"></i> Để lấy Vĩ độ & Kinh độ: Tìm địa chỉ trên Google Maps, nhấp chuột phải vào vị trí, chọn "Đây là gì?".
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Operating Hours Card -->
+                        <div class="form-card">
+                            <div class="card-header-modern">
+                                <h4><i class="far fa-clock"></i>Giờ hoạt động</h4>
+                            </div>
+                            <div class="card-body-modern" id="operatingHoursContainer">
+                                @* SỬA: Giữ nguyên logic lặp và Tag Helpers cho OperatingHours, vì nó đã đúng *@
+                                @for (int i = 0; i < Model.OperatingHoursList.Count; i++)
+                                {
+                                    <div class="operating-hours-card">
+                                        <div class="row align-items-center gx-3 gy-2">
+                                            <input type="hidden" asp-for="OperatingHoursList[i].DayOfWeek" />
+                                            <div class="col-md-3 col-lg-2">
+                                                <span class="day-label-modern">@Model.OperatingHoursList[i].DayDisplayName</span>
+                                            </div>
+                                            <div class="col-md-2 col-lg-1 text-center">
+                                                <div class="form-check form-switch form-switch-modern d-inline-block">
+                                                    <input asp-for="OperatingHoursList[i].IsOpen" class="form-check-input operating-day-toggle" type="checkbox" role="switch" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 col-lg-4">
+                                                <div class="input-group time-input-group-modern">
+                                                    <span class="input-group-text">Khung 1</span>
+                                                    <input asp-for="OperatingHoursList[i].OpenTime1" type="time" class="form-control operating-time-input" />
+                                                    <span class="input-group-text">-</span>
+                                                    <input asp-for="OperatingHoursList[i].CloseTime1" type="time" class="form-control operating-time-input" />
+                                                </div>
+                                                <span asp-validation-for="OperatingHoursList[i].OpenTime1" class="validation-error"></span>
+                                                <span asp-validation-for="OperatingHoursList[i].CloseTime1" class="validation-error"></span>
+                                            </div>
+                                            <div class="col-md-4 col-lg-5">
+                                                <div class="input-group time-input-group-modern">
+                                                    <span class="input-group-text">Khung 2</span>
+                                                    <input asp-for="OperatingHoursList[i].OpenTime2" type="time" class="form-control operating-time-input" />
+                                                    <span class="input-group-text">-</span>
+                                                    <input asp-for="OperatingHoursList[i].CloseTime2" type="time" class="form-control operating-time-input" />
+                                                </div>
+                                                <span asp-validation-for="OperatingHoursList[i].OpenTime2" class="validation-error"></span>
+                                                <span asp-validation-for="OperatingHoursList[i].CloseTime2" class="validation-error"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Images Card -->
+                        <div class="form-card">
+                            <div class="card-header-modern">
+                                <h4><i class="fas fa-images"></i>Hình ảnh Doanh nghiệp</h4>
+                            </div>
+                            <div class="card-body-modern">
+                                <div class="mb-4">
+                                    @* SỬA: Dùng Tag Helpers *@
+                                    <label asp-for="MainImageFile" class="form-label-modern"></label>
+                                    <div class="file-input-modern">
+                                        <input asp-for="MainImageFile" type="file" accept="image/*" />
+                                        <div class="file-input-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                                        <span class="file-input-text">Kéo thả hoặc chọn ảnh</span>
+                                    </div>
+                                    <span asp-validation-for="MainImageFile" class="validation-error"></span>
+                                </div>
+                                <div>
+                                    @* SỬA: Dùng Tag Helpers *@
+                                    <label asp-for="OtherImageFiles" class="form-label-modern"></label>
+                                    <div class="file-input-modern">
+                                        <input asp-for="OtherImageFiles" type="file" multiple accept="image/*" />
+                                        <div class="file-input-icon"><i class="fas fa-photo-video"></i></div>
+                                        <span class="file-input-text">Kéo thả hoặc chọn nhiều ảnh</span>
+                                    </div>
+                                    <span asp-validation-for="OtherImageFiles" class="validation-error"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cuisines and Tags Card -->
+                        <div class="form-card">
+                            <div class="card-header-modern">
+                                <h4><i class="fas fa-tags"></i>Phân loại & Đặc điểm</h4>
+                            </div>
+                            <div class="card-body-modern">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-4">
+                                            @* SỬA: Label dùng Tag Helper, các checkbox giữ nguyên vì đã đúng *@
+                                            <label asp-for="SelectedCuisineTypeIds" class="form-label-modern"></label>
+                                            @if (Model.AvailableCuisineTypes != null && Model.AvailableCuisineTypes.Any())
+                                            {
+                                                <div class="checkbox-list-container">
+                                                    @foreach (var cuisine in Model.AvailableCuisineTypes)
+                                                    {
+                                                        <div class="checkbox-list-item">
+                                                            <div class="form-check">
+                                                                <input type="checkbox" name="SelectedCuisineTypeIds" value="@cuisine.Id"
+                                                                       id="cuisine-@cuisine.Id" class="form-check-input"
+                                                                @(cuisine.IsSelected ? "checked=\"checked\"" : "") />
+                                                                <label class="form-check-label" for="cuisine-@cuisine.Id">
+                                                                    @if (!string.IsNullOrEmpty(cuisine.IconUrl))
+                                                                    {
+                                                                        <img src="@cuisine.IconUrl" alt="" width="20" height="20" class="me-1" style="object-fit: contain; vertical-align: middle;" />
+                                                                    }
+                                                                    @cuisine.Name
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                                <span asp-validation-for="SelectedCuisineTypeIds" class="validation-error"></span>
+                                            }
+                                            else
+                                            {
+                                                <p class="text-muted">Không có loại hình ẩm thực nào để chọn.</p>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-4">
+                                            @* SỬA: Label dùng Tag Helper, các checkbox giữ nguyên vì đã đúng *@
+                                            <label asp-for="SelectedTagIds" class="form-label-modern"></label>
+                                            @if (Model.AvailableTags != null && Model.AvailableTags.Any())
+                                            {
+                                                <div class="checkbox-list-container">
+                                                    @foreach (var tag in Model.AvailableTags)
+                                                    {
+                                                        <div class="checkbox-list-item">
+                                                            <div class="form-check">
+                                                                <input type="checkbox" name="SelectedTagIds" value="@tag.Id"
+                                                                       id="tag-@tag.Id" class="form-check-input"
+                                                                @(tag.IsSelected ? "checked=\"checked\"" : "") />
+                                                                <label class="form-check-label" for="tag-@tag.Id">
+                                                                    @if (!string.IsNullOrEmpty(tag.IconUrl))
+                                                                    {
+                                                                        <img src="@tag.IconUrl" alt="" width="20" height="20" class="me-1" style="object-fit: contain; vertical-align: middle;" />
+                                                                    }
+                                                                    @tag.Name
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                                <span asp-validation-for="SelectedTagIds" class="validation-error"></span>
+                                            }
+                                            else
+                                            {
+                                                <p class="text-muted">Không có đặc điểm/tiện ích nào để chọn.</p>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-5 mb-3">
+                            <button type="submit" class="btn btn-primary-modern"><i class="fas fa-paper-plane me-2"></i>Đăng ký Ngay</button>
+                            <a asp-action="Index" asp-controller="Home" class="btn btn-outline-modern ms-3">Hủy bỏ</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    @* Phần `else` giữ nguyên, không cần thay đổi *@
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-7">
+                <div class="card shadow-lg text-center p-4 p-md-5 form-card">
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <i class="fas fa-exclamation-triangle fa-4x" style="color: var(--secondary-gradient);"></i>
+                        </div>
+                        <h3 class="card-title page-title" style="font-size: 1.8rem;">Vui lòng đăng nhập</h3>
+                        <p class="card-text text-muted mb-4">Bạn cần đăng nhập để có thể đăng ký doanh nghiệp mới trên nền tảng của chúng tôi.</p>
+                        <a class="btn btn-primary-modern btn-lg" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("Register", "Business")">
+                            <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập ngay
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta3/js/bootstrap-select.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            // Operating Hours Toggle Logic - GIỮ NGUYÊN
+            $('#operatingHoursContainer .operating-hours-card').each(function() {
+                var $card = $(this);
+                var $isOpenCheckbox = $card.find('.operating-day-toggle');
+                var $timeInputs = $card.find('.operating-time-input');
+
+                function toggleTimeInputsEnabledState() {
+                    var isChecked = $isOpenCheckbox.is(':checked');
+                    $timeInputs.prop('disabled', !isChecked);
+                    if (!isChecked) {
+                        $timeInputs.val('');
+                    }
+                }
+                $isOpenCheckbox.on('change', toggleTimeInputsEnabledState);
+                toggleTimeInputsEnabledState();
+            });
+
+            // SỬA: XÓA ĐOẠN JAVASCRIPT XỬ LÝ CHECKBOX THỦ CÔNG
+            // Đoạn mã này không còn cần thiết vì model binding đã xử lý nó.
+
+            // File input custom text (hiển thị tên file đã chọn) - GIỮ NGUYÊN
+            $('input[type="file"]').on('change', function(e) {
+                var fileName = "";
+                if (this.files && this.files.length > 1) {
+                    fileName = (this.getAttribute('data-multiple-caption') || '').replace('{count}', this.files.length) || this.files.length + ' files selected';
+                } else if (e.target.value) {
+                    fileName = e.target.value.split('\\').pop();
+                }
+
+                var $label = $(this).closest('.file-input-modern').find('.file-input-text');
+                if (fileName) {
+                    $label.text(fileName);
+                } else {
+                    $label.text($label.data('default-text') || 'Kéo thả hoặc chọn file');
+                }
+            });
+            $('.file-input-modern .file-input-text').each(function(){
+                $(this).data('default-text', $(this).text());
+            });
+
+            // Phần Login Modal Logic - GIỮ NGUYÊN
+        });
+    </script>
+}

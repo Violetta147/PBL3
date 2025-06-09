@@ -1,0 +1,432 @@
+/* Restaurant Card Styling - Optimized */
+
+/* Basic card styling */
+.restaurant-card {
+    background-color: rgba(0,0,0,0);
+    border-radius: 8px;
+    border: none;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    margin-bottom: 15px;
+    padding: 12px;
+    min-height: 150px; /* Ensure minimum height for consistent appearance */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.restaurant-card:hover {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(-3px);
+}
+
+/* Card content layout */
+.restaurant-card .row {
+    height: 100%;
+    position: relative;
+}
+
+/* Restaurant image */
+.restaurant-card img {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+/* Restaurant details column */
+.restaurant-card .col {
+    padding-right: 120px; /* Space for the button */
+}
+
+/* Restaurant name */
+.restaurant-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.restaurant-card .card-title a {
+    color: #333;
+    text-decoration: none;
+}
+
+.restaurant-card .card-title a:hover {
+    color: #0d6efd;
+}
+
+/* Rating stars */
+.restaurant-card .text-warning {
+    color: #FFC107;
+}
+
+/* Address and metadata */
+.restaurant-card .text-muted {
+    color: #6c757d;
+}
+
+/* "Xem chi tiết" button positioning to bottom right corner */
+.restaurant-card .d-grid {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: auto;
+}
+
+/* "Xem chi tiết" button styling */
+.restaurant-card .d-grid .btn {
+    white-space: nowrap;
+    padding: 0.25rem 0.75rem;
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+.restaurant-card .d-grid .btn:hover {
+    background-color: #0d6efd;
+    color: white;
+}
+
+/* Remove default blue highlight effect when clicking on a restaurant card */
+.restaurant-item {
+    outline: none;
+}
+
+/* Ensure content containers are visible */
+.container, .container-fluid, .row, .col, .col-md-8 {
+    position: relative;
+}
+
+/* ==== RESTAURANT CARD SKELETON LOADING ==== */
+.restaurant-card-skeleton .skeleton-img {
+    height: 180px;
+    width: 100%;
+}
+
+.restaurant-card-skeleton .skeleton-title {
+    height: 24px;
+    width: 80%;
+    margin-bottom: 12px;
+}
+
+.restaurant-card-skeleton .skeleton-meta {
+    height: 18px;
+    width: 60%;
+    margin-bottom: 10px;
+}
+
+.restaurant-card-skeleton .skeleton-address {
+    height: 16px;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.restaurant-card-skeleton .skeleton-btn {
+    height: 32px;
+    width: 100px;
+}
+#restaurants-column {
+    overflow-y: hidden !important;
+}
+
+/* Make the restaurant list inside the column scrollable */
+#restaurant-list {
+    height: calc(100vh - 150px);
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* Increase width of restaurant cards */
+.restaurant-card {
+    padding: 12px;
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+/* Adjust restaurant card image size */
+.restaurant-card img {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 0.25rem;
+}
+
+/* Decrease the length of the "Xem chi tiết" button */
+.restaurant-item .btn-outline-primary {
+    display: inline-block;
+    width: auto;
+    padding: 0.25rem 0.75rem;
+    max-width: fit-content;
+}
+
+/* Improve spacing in restaurant cards */
+.restaurant-card .card-title {
+    font-size: 1.1rem;
+}
+
+/* Adjust the badge spacing and size */
+.restaurant-card .badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    #restaurant-list {
+        height: auto;
+        overflow-y: visible;
+    }
+}
+/* Restaurant Card Styling - Optimized */
+
+/* Basic card styling */
+.restaurant-card {
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    margin-bottom: 15px;
+    padding: 12px;
+}
+
+.restaurant-card:hover {
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+}
+
+/* Card content layout */
+.restaurant-card .row {
+    height: 100%;
+    position: relative;
+}
+
+/* Restaurant image */
+.restaurant-card img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+/* Restaurant name */
+.restaurant-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.restaurant-card .card-title a {
+    color: #333;
+    text-decoration: none;
+}
+
+.restaurant-card .card-title a:hover {
+    color: #0d6efd;
+}
+
+/* Rating stars */
+.restaurant-card .text-warning {
+    color: #FFC107;
+}
+
+/* Address and metadata */
+.restaurant-card .text-muted {
+    color: #6c757d;
+}
+
+/* "Xem chi tiết" button positioning to bottom right corner */
+.restaurant-card .d-grid {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: auto;
+}
+
+/* "Xem chi tiết" button styling */
+.restaurant-card .d-grid .btn {
+    white-space: nowrap;
+    padding: 0.25rem 0.75rem;
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+/* Remove blue highlight effect when clicking on a restaurant card */
+.restaurant-item {
+    outline: none;
+}
+
+/* Badge styling */
+.restaurant-card .badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+}
+
+/* Restaurant list container */
+#restaurants-column {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 80px);
+    overflow-y: auto;
+    padding-right: 15px;
+}
+
+/* Restaurant list */
+#restaurant-list {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+/* Pagination container */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e5e5;
+    position: sticky;
+    bottom: 0;
+    background-color: #f8f9fa;
+    z-index: 1000;
+}
+
+.pagination {
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    background-color: #f8f9fa;
+    display: inline-flex;
+    margin: 0 auto;
+}
+
+.pagination .page-link {
+    color: #0d6efd;
+    border: 1px solid #dee2e6;
+    padding: 0.5rem 0.75rem;
+    margin: 0 2px;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: white;
+}
+
+.pagination .page-link:hover:not(.active) {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.page-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Filters Column */
+#filters-column {
+    width: 280px !important;
+    min-width: 280px !important;
+    align-self: flex-start;
+    position: sticky;
+    top: 20px;
+    height: calc(100vh - 80px);
+    overflow-y: auto;
+}
+
+/* Map Section */
+#map-section {
+    width: 40% !important;
+    height: calc(100vh - 80px);
+    position: sticky;
+    top: 20px;
+}
+
+#mapbox-container {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+}
+
+/* Skeleton loading placeholders */
+.restaurant-card-skeleton .skeleton-img {
+    height: 70px;
+    width: 70px;
+}
+
+.restaurant-card-skeleton .skeleton-title {
+    height: 24px;
+    width: 80%;
+    margin-bottom: 12px;
+}
+
+.restaurant-card-skeleton .skeleton-meta {
+    height: 18px;
+    width: 60%;
+    margin-bottom: 10px;
+}
+
+.restaurant-card-skeleton .skeleton-address {
+    height: 16px;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.restaurant-card-skeleton .skeleton-btn {
+    height: 32px;
+    width: 100px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    #main-frame,
+    #left-section {
+        flex-direction: column !important;
+        height: auto !important;
+        min-height: unset;
+        overflow: visible;
+    }
+
+    #left-section {
+        width: 100% !important;
+        padding: 0 15px !important;
+        gap: 0;
+    }
+
+    #filters-column,
+    #restaurants-column,
+    #map-section {
+        position: static !important;
+        width: 100% !important;
+        height: auto !important;
+        overflow-y: visible;
+    }
+
+    #filters-column {
+        margin-bottom: 2rem;
+    }
+
+    #map-section {
+        height: 400px !important;
+        padding: 0 15px 15px 15px !important;
+        margin-bottom: 20px;
+    }
+
+    .pagination-container {
+        position: static;
+        margin-top: 1rem;
+    }
+}

@@ -1,0 +1,142 @@
+@model IEnumerable<PBL3.ViewModel.RestaurantCardViewModel>
+@using PBL3.Models
+
+@foreach (var restaurant in Model)
+{
+    <div class="col">
+        <div class="restaurant-card restaurant-item" 
+             data-id="@restaurant.Id" 
+             data-lat="@restaurant.Latitude" 
+             data-lng="@restaurant.Longitude"
+             data-name="@restaurant.Name"
+             data-rating="@restaurant.AverageRating.ToString("0.0")"
+             data-review-count="@restaurant.ReviewCount"
+             data-address="@restaurant.FullAddress">
+            <div class="row g-0 align-items-center">
+                <div class="col-auto">
+                    <img src="@restaurant.CardImageUrl" class="rounded-start" alt="@restaurant.Name" style="width: 90px; height: 90px; object-fit: cover;">
+                </div>
+                <div class="col ps-2 pe-5">
+                    <!-- Restaurant Name -->
+                    <h5 class="card-title fw-bold mb-1 text-truncate">@restaurant.Name</h5>
+                    
+                    <!-- Star Rating below restaurant name -->
+                    <div class="mb-1 d-flex align-items-center">
+                        <span class="text-warning fw-bold me-1">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="bi bi-star@(i <= Math.Round(restaurant.AverageRating) ? "-fill" : "")"></i>
+                            }
+                        </span>
+                        <span class="fw-bold">@restaurant.AverageRating.ToString("0.0")</span>
+                        <span class="text-muted small ms-1">(@restaurant.ReviewCount reviews)</span>
+                    </div>
+
+                    <!-- Restaurant Categories -->
+                    <div class="mb-1 d-flex align-items-center flex-wrap">
+                        @if (restaurant.CuisineSummary != null && restaurant.CuisineSummary.Any())
+                        {
+                            <span class="me-2"><i class="bi bi-tag"></i> @string.Join(", ", restaurant.CuisineSummary.Where(c => c != null))</span>
+                        }
+                        @if (!string.IsNullOrEmpty(restaurant.PriceRange))
+                        {
+                            <span class="text-muted">•</span>
+                            <span class="ms-2">@restaurant.PriceRange</span>
+                        }
+                    </div>
+                    
+                    <!-- Open/Closed Status -->
+                    <div class="mb-1">
+                        @{
+                            bool isCurrentlyOpen = false;
+                            string statusMsg = "";
+                            
+                            var currentDay = DateTime.Now.DayOfWeek;
+                            var now = DateTime.Now.TimeOfDay;
+                            
+                            if (restaurant.OperatingHours != null && restaurant.OperatingHours.Any())
+                            {
+                                var todayHours = restaurant.OperatingHours.FirstOrDefault(h => h.DayOfWeek == currentDay);
+                                
+                                if (todayHours != null)
+                                {
+                                    var openTime = todayHours.OpenTime;
+                                    var closeTime = todayHours.CloseTime;
+                                    
+                                    bool isOvernight = closeTime < openTime;
+                                    isCurrentlyOpen = isOvernight 
+                                        ? now >= openTime || now <= closeTime
+                                        : now >= openTime && now <= closeTime;
+                                        
+                                    if (isCurrentlyOpen)
+                                    {
+                                        string FormatTimeSpan(TimeSpan time)
+                                        {
+                                            int hour = time.Hours;
+                                            string amPm = hour >= 12 ? "PM" : "AM";
+                                            int hour12 = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+                                            return $"{hour12}:{time.Minutes:00} {amPm}";
+                                        }
+                                        
+                                        string formattedCloseTime = FormatTimeSpan(closeTime);
+                                        statusMsg = $"Open · Closes at {formattedCloseTime}";
+                                    }
+                                    else
+                                    {
+                                        string FormatTimeSpan(TimeSpan time)
+                                        {
+                                            int hour = time.Hours;
+                                            string amPm = hour >= 12 ? "PM" : "AM";
+                                            int hour12 = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+                                            return $"{hour12}:{time.Minutes:00} {amPm}";
+                                        }
+                                        
+                                        string formattedOpenTime = FormatTimeSpan(openTime);
+                                        statusMsg = $"Closed · Opens at {formattedOpenTime}";
+                                    }
+                                }
+                                else
+                                {
+                                    isCurrentlyOpen = restaurant.Status == RestaurantStatus.Open;
+                                    statusMsg = isCurrentlyOpen ? "Open Today" : "Closed Today";
+                                }
+                            }
+                            else
+                            {
+                                isCurrentlyOpen = restaurant.Status == RestaurantStatus.Open;
+                                statusMsg = isCurrentlyOpen ? "Open" : "Closed";
+                            }
+                        }
+                        
+                        @if (isCurrentlyOpen)
+                        {
+                            <span class="badge bg-success"><i class="bi bi-door-open me-1"></i> @statusMsg</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger"><i class="bi bi-door-closed me-1"></i> @statusMsg</span>
+                        }
+                    </div>
+
+                    <div class="mb-1 text-muted small"><i class="bi bi-geo-alt"></i> @restaurant.FullAddress</div>
+                    
+                    @if (!string.IsNullOrWhiteSpace(restaurant.Description))
+                    {
+                        <div class="mb-1 small description-area">@restaurant.Description</div>
+                    }
+                    else 
+                    {
+                        <div class="mb-1 small description-area">@restaurant.Name</div>
+                    }
+                </div>
+            </div>
+            
+            <!-- Button positioned at bottom right -->
+            <div class="d-grid position-absolute bottom-0 end-0 m-2">
+                <a href="/Restaurant/Details/@restaurant.Id" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-eye me-1"></i> Xem chi tiết
+                </a>
+            </div>
+        </div>
+    </div>
+}

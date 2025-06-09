@@ -1,0 +1,174 @@
+.fishloot-navbar {
+    background-color: #9FFFCB;
+    padding: 15px 0;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.fishloot-logo {
+    height: 36px;
+    margin-right: 5px;
+    margin-left: 5px;
+}
+
+.fishloot-search-container {
+    display: flex;
+    flex-grow: 1;
+    max-width: 900px;
+}
+
+.search-inputs-group {
+    display: flex;
+    width: 100%;
+}
+
+.fishloot-search-input {
+    border-radius: 4px 0 0 4px;
+    border: 1px solid #7AE582;
+    padding: 8px 16px;
+    width: 45%;
+    font-size: 14px;
+}
+
+.location-input-container {
+    position: relative;
+    width: 55%;
+}
+
+.fishloot-search-location {
+    border-radius: 0;
+    border: 1px solid #7AE582;
+    border-left: none;
+    padding: 8px 16px;
+    width: 100%;
+    font-size: 14px;
+}
+
+.location-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #7AE582;
+    border-top: none;
+    display: none;
+    /* z-index: 2000; Higher than map elements to ensure visibility */
+}
+
+.location-dropdown.show {
+    display: block;
+}
+
+.dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 8px 16px;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.fishloot-search-button {
+    background-color: #25A18E;
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.fishloot-nav-links {
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.fishloot-nav-link {
+    color: #333;
+    margin: 0 12px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.fishloot-signup-button {
+    background-color: #25A18E;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-weight: bold;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.fishloot-login-button {
+    background-color: transparent;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-weight: bold;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.fishloot-name {
+    font-size: 1.0rem;
+    /* adjust as needed */
+    font-weight: 600;
+    color: #004E64;
+    /* match your theme */
+    white-space: nowrap;
+    line-height: 1;
+    margin-right: 5px;
+}
+
+/* Thêm style cho nút logout nếu cần */
+.fishloot-logout-button {
+    background-color: transparent;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-weight: bold;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+/* Avatar cho dropdown người dùng */
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #25A18E;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.user-avatar-button {
+    padding: 0;
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.user-avatar-button::after {
+    margin-left: 8px;
+    content: "";
+    display: inline-block;
+    vertical-align: middle;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #333;
+}

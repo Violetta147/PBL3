@@ -1,0 +1,397 @@
+@model PBL3.ViewModel.SearchViewModel
+
+@{
+    ViewData["Title"] = "Search";
+    ViewData["BodyClass"] = "search-page";
+}
+
+@section Styles {
+    <!-- Mapbox GL CSS -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">      <!-- Custom CSS-->
+    <link rel="stylesheet" href="~/css/restaurant-card.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/search-results.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/pagination.css" asp-append-version="true">    <link rel="stylesheet" href="~/lib/spiderifier/mapboxgl-spiderifier.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/search-map-spider.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/scattered-markers.css" asp-append-version="true">
+}
+
+<!-- Hidden fields to pass data to JavaScript -->
+<input type="hidden" id="mapbox-token" value="@ViewData["MapboxToken"]">
+<input type="hidden" id="map-initial-lat" value="@(Model.Lat?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "16.075000")">
+<input type="hidden" id="map-initial-lng" value="@(Model.Lng?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "108.206230")">
+<input type="hidden" id="map-initial-query" value="@Model.SearchTerm">
+
+<div class="container-fluid" id="main-frame">
+
+    <!-- LEFT SECTION (Filters & Results) -->
+    <div id="left-section">
+        <aside id="filters-column">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-funnel me-2"></i>Bộ lọc</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Index" asp-controller="Search" method="get" id="filter-form" autocomplete="off">
+                        <!-- Hidden fields -->
+                        <input type="hidden" name="SearchTerm" value="@Model.SearchTerm" />
+                        <input type="hidden" name="Address" value="@Model.Address" />
+                        @if (Model.Lat.HasValue) { <input type="hidden" name="Lat" value="@Model.Lat.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)" /> }
+                        @if (Model.Lng.HasValue) { <input type="hidden" name="Lng" value="@Model.Lng.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)" /> }
+                        <input type="hidden" name="Page" value="1" />
+                        <input type="hidden" name="PageSize" value="@Model.PageSize" />
+
+                        <!-- Filters content here -->
+                         <div class="mb-3">
+                             <label class="form-label fw-bold">Danh Mục</label>
+                             @if (ViewBag.CuisineTypes != null) {
+                                 var cuisineTypes = ViewBag.CuisineTypes as List<PBL3.Models.CuisineType>;
+                                 if (cuisineTypes != null) {
+                                     foreach (var cuisine in cuisineTypes.Take(6)) {
+                                        bool isSelected = Model.CuisineTypeIds != null && Model.CuisineTypeIds.Contains(cuisine.Id);
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="CuisineTypeIds" value="@cuisine.Id" id="cuisine_@cuisine.Id" @(isSelected ? "checked" : "")><label class="form-check-label" for="cuisine_@cuisine.Id">@cuisine.Name</label></div>
+                                     }
+                                     if (cuisineTypes.Count > 6) {
+                                        <button type="button" class="btn btn-link btn-sm p-0" data-bs-toggle="modal" data-bs-target="#allCategoriesModal">Xem tất cả</button>
+                                     }
+                                 }
+                             }
+                         </div>
+                         <div class="mb-3">                             <label class="form-label fw-bold">Khoảng giá</label>
+                             <div class="row g-2">
+                                <div class="col-6"><input type="number" name="MinPrice" value="@Model.MinPrice" class="form-control form-control-sm" placeholder="Tối thiểu" step="5000" min="0"></div>
+                                <div class="col-6"><input type="number" name="MaxPrice" value="@Model.MaxPrice" class="form-control form-control-sm" placeholder="Tối đa" step="5000" min="0"></div>
+                             </div>
+                         </div>
+                         <div class="mb-3">
+                              <label class="form-label fw-bold">Khoảng cách</label>
+                              <div class="form-check"><input class="form-check-input" type="radio" name="MaxDistance" id="distance-all" value="" @(string.IsNullOrEmpty(Model.MaxDistance) ? "checked" : "")><label class="form-check-label" for="distance-all">Tất cả</label></div>
+                              <div class="form-check"><input class="form-check-input" type="radio" name="MaxDistance" id="distance-5km" value="5" @(Model.MaxDistance == "5" ? "checked" : "")><label class="form-check-label" for="distance-5km">Dưới 5 km</label></div>
+                              <div class="form-check"><input class="form-check-input" type="radio" name="MaxDistance" id="distance-2km" value="2" @(Model.MaxDistance == "2" ? "checked" : "")><label class="form-check-label" for="distance-2km">Dưới 2 km</label></div>
+                              <div class="form-check"><input class="form-check-input" type="radio" name="MaxDistance" id="distance-1km" value="1" @(Model.MaxDistance == "1" ? "checked" : "")><label class="form-check-label" for="distance-1km">Dưới 1 km</label></div>
+                         </div>
+                        
+                        <div class="d-grid mt-4">
+                            <button type="submit" id="apply-filters-btn" class="btn btn-primary">Áp dụng bộ lọc</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Restaurants Column -->
+        <main id="restaurants-column">
+            <!-- Results Header -->
+            <div class="results-header mb-3 d-flex justify-content-between align-items-center">
+                 @{ bool hasRestaurants = Model.RestaurantCards?.Any() ?? false; }
+                 <div>                    <h1 class="h4 mb-0">
+                        @if (hasRestaurants) {
+                            @if(string.IsNullOrEmpty(Model.SearchTerm)) {
+                                <span>Top 10 địa điểm ở Đà Nẵng</span>
+                            } else {
+                                @if(!string.IsNullOrEmpty(Model.Address)) {
+                                    <span>@Model.SearchTerm gần @Model.Address</span>
+                                } else {
+                                    <span>@Model.SearchTerm ở Đà Nẵng</span>
+                                }
+                            }
+                        } else {
+                            <span>Không tìm thấy kết quả</span>
+                        }
+                    </h1>
+                 </div>                 @if (hasRestaurants) {                     <form asp-action="Index" asp-controller="Search" method="get" id="sort-form" class="ms-3">
+                         <!-- Preserve all search parameters -->
+                         <input type="hidden" name="SearchTerm" value="@Model.SearchTerm" />
+                         <input type="hidden" name="Address" value="@Model.Address" />
+                         @if (Model.Lat.HasValue) { <input type="hidden" name="Lat" value="@Model.Lat.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)" /> }
+                         @if (Model.Lng.HasValue) { <input type="hidden" name="Lng" value="@Model.Lng.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)" /> }
+                         @if (!string.IsNullOrEmpty(Model.MaxDistance)) { <input type="hidden" name="MaxDistance" value="@Model.MaxDistance" /> }
+                         @if (Model.MinPrice.HasValue) { <input type="hidden" name="MinPrice" value="@Model.MinPrice.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)" /> }
+                         @if (Model.MaxPrice.HasValue) { <input type="hidden" name="MaxPrice" value="@Model.MaxPrice.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)" /> }
+                         
+                         <!-- Include CuisineTypeIds as hidden inputs -->
+                         @if (Model.CuisineTypeIds != null)
+                         {
+                             foreach (var id in Model.CuisineTypeIds)
+                             {
+                                 <input type="hidden" name="CuisineTypeIds" value="@id" />
+                             }
+                         }
+                         
+                         <!-- Include TagIds as hidden inputs -->
+                         @if (Model.TagIds != null)
+                         {
+                             foreach (var id in Model.TagIds)
+                             {
+                                 <input type="hidden" name="TagIds" value="@id" />
+                             }
+                         }                           
+                             <select name="SortBy" class="form-select form-select-sm" onchange="this.form.submit()" style="min-width: 180px;">
+                             <option value="relevance" selected="@(Model.SortBy == "relevance")">Sắp xếp: Được đề xuất</option>
+                             <option value="highestrated" selected="@(Model.SortBy == "highestrated")">Sắp xếp: Xếp hạng cao nhất</option>
+                             <option value="mostreviewed" selected="@(Model.SortBy == "mostreviewed")">Sắp xếp: Đánh giá nhiều nhất</option>
+                         </select>
+                     </form>
+                 }
+            </div>            <!-- Restaurant List -->
+             @if (hasRestaurants) {
+                <div id="restaurant-list">
+                    @await Html.PartialAsync("_RestaurantCardPartial", Model.RestaurantCards)
+                </div>
+                <div class="pagination-container">
+                    @if (Model.RestaurantCards != null && Model.RestaurantCards.PageCount > 1)
+                     {                        
+                        <nav class="pagination-nav-visible">
+                           <ul class="pagination pagination-list-visible">
+                               @if (Model.RestaurantCards.HasPreviousPage) { 
+                                   <li class="page-item-visible">
+                                       <a class="page-link-visible page-link-prev" href="javascript:loadPage(@(Model.RestaurantCards.PageNumber - 1))">«</a>
+                                   </li> 
+                               }
+                               @for (int i = 1; i <= Model.RestaurantCards.PageCount; i++) { 
+                                   <li class="page-item-visible" data-page="@i">
+                                       <a class="page-link-visible @(i == Model.RestaurantCards.PageNumber ? "current-page" : "")" 
+                                          href="javascript:loadPage(@i)">@i</a>
+                                   </li> 
+                               }
+                               @if (Model.RestaurantCards.HasNextPage) { 
+                                   <li class="page-item-visible">
+                                       <a class="page-link-visible page-link-next" href="javascript:loadPage(@(Model.RestaurantCards.PageNumber + 1))">»</a>
+                                   </li> 
+                               }
+                           </ul>
+                        </nav>
+                    }
+                </div>
+             } else {
+                <div class="text-center p-5 bg-light rounded">
+                    <p>Không tìm thấy nhà hàng nào phù hợp với tìm kiếm của bạn.</p>
+                </div>
+             }
+        </main>
+    </div>
+
+    <!-- RIGHT SECTION (Map) -->
+    <aside id="map-section">
+        <div id="mapbox-container"></div>
+    </aside>
+
+</div>
+
+<!-- All Categories Modal -->
+<div class="modal fade" id="allCategoriesModal" tabindex="-1" aria-labelledby="allCategoriesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="allCategoriesModalLabel">Tất cả danh mục</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    @if (ViewBag.CuisineTypes != null)
+                    {
+                        var cuisineTypes = ViewBag.CuisineTypes as List<PBL3.Models.CuisineType>;
+                        if (cuisineTypes != null)
+                        {
+                            @foreach (var cuisine in cuisineTypes)
+                            {
+                                bool isSelected = Model.CuisineTypeIds != null && Model.CuisineTypeIds.Contains(cuisine.Id);
+                                <div class="col-md-4 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input modal-cuisine-checkbox" type="checkbox" 
+                                               value="@cuisine.Id" id="modal_cuisine_@cuisine.Id" 
+                                               @(isSelected ? "checked" : "")>
+                                        <label class="form-check-label" for="modal_cuisine_@cuisine.Id">
+                                            @cuisine.Name
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="applyModalCategories">Áp dụng</button>
+            </div>
+        </div>    </div>
+</div>
+
+@section Scripts {    
+    <script>
+        // Initialize filters functionality
+        document.addEventListener('DOMContentLoaded', function() {            // Sync all hidden inputs to ensure modal reflects all selected IDs
+            function syncCuisineTypeSelections() {
+                console.log("Syncing cuisine selections...");
+                
+                // Get all selected cuisine IDs (both visible checkboxes and hidden inputs)
+                const visibleSelections = Array.from(
+                    document.querySelectorAll('input[name="CuisineTypeIds"][type="checkbox"]:checked')
+                ).map(cb => cb.value);
+                console.log("Visible selections:", visibleSelections);
+                
+                const hiddenSelections = Array.from(
+                    document.querySelectorAll('input[name="CuisineTypeIds"][type="hidden"]')
+                ).map(input => input.value);
+                console.log("Hidden selections:", hiddenSelections);
+                
+                // Get cuisine IDs from URL params (in case they weren't added as hidden inputs)
+                const urlParams = new URLSearchParams(window.location.search);
+                const urlSelections = urlParams.getAll('CuisineTypeIds');
+                console.log("URL selections:", urlSelections);
+                
+                // Combine all arrays without duplicates
+                const allSelectedIds = [...new Set([...visibleSelections, ...hiddenSelections, ...urlSelections])];
+                console.log("All selected IDs:", allSelectedIds);
+                
+                // Update all modal checkboxes to reflect these selections
+                document.querySelectorAll('.modal-cuisine-checkbox').forEach(cb => {
+                    cb.checked = allSelectedIds.includes(cb.value);
+                    console.log(`Setting checkbox ${cb.value} to ${cb.checked}`);
+                });
+                
+                return allSelectedIds;
+            }
+            
+            // Sync modal checkboxes when the modal is shown
+            const modalElement = document.getElementById('allCategoriesModal');
+            if (modalElement) {
+                // Use both 'show.bs.modal' and 'shown.bs.modal' to ensure it works
+                modalElement.addEventListener('show.bs.modal', function() {
+                    console.log("Modal show event triggered");
+                    syncCuisineTypeSelections();
+                });
+                
+                modalElement.addEventListener('shown.bs.modal', function() {
+                    console.log("Modal shown event triggered");
+                    syncCuisineTypeSelections();
+                });
+                
+                // Add a direct click handler to the button that opens the modal
+                document.querySelector('[data-bs-target="#allCategoriesModal"]').addEventListener('click', function() {
+                    console.log("Modal button clicked");
+                    // Add a small delay to ensure modal is ready
+                    setTimeout(syncCuisineTypeSelections, 100);
+                });
+            }
+            
+            // Remove any animations from the Apply Filters button
+            const applyFiltersBtn = document.getElementById('apply-filters-btn');
+            if (applyFiltersBtn) {
+                // Ensure button works correctly without animations
+                applyFiltersBtn.addEventListener('click', function(e) {
+                    const form = this.closest('form');
+                    if (form) {
+                        // No loading animations - just submit
+                        form.submit();
+                    }
+                });
+            }            // Handle modal categories
+            const applyModalBtn = document.getElementById('applyModalCategories');
+            if (applyModalBtn) {
+                applyModalBtn.addEventListener('click', function() {
+                    const checkedBoxes = document.querySelectorAll('.modal-cuisine-checkbox:checked');
+                    const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
+                    console.log("Selected IDs from modal:", selectedIds);
+                    
+                    const form = document.getElementById('filter-form');
+                    
+                    // Remove any existing hidden inputs for CuisineTypeIds
+                    document.querySelectorAll('input[name="CuisineTypeIds"][type="hidden"]').forEach(input => {
+                        input.remove();
+                    });
+                    
+                    // Update checkboxes in the main form (for first 6 items)
+                    document.querySelectorAll('input[name="CuisineTypeIds"][type="checkbox"]').forEach(cb => {
+                        const wasChecked = cb.checked;
+                        cb.checked = selectedIds.includes(cb.value);
+                        console.log(`Checkbox ${cb.value}: ${wasChecked} -> ${cb.checked}`);
+                    });
+                    
+                    // Add hidden inputs for all selected IDs that aren't in visible checkboxes
+                    selectedIds.forEach(id => {
+                        // Check if there's already a checkbox for this ID in the main form
+                        const existingCheckbox = form.querySelector(`input[name="CuisineTypeIds"][value="${id}"][type="checkbox"]`);
+                        
+                        // If no checkbox exists for this ID in the main form, add a hidden input
+                        if (!existingCheckbox) {
+                            console.log(`Adding hidden input for ID ${id}`);
+                            const hiddenInput = document.createElement('input');
+                            hiddenInput.type = 'hidden';
+                            hiddenInput.name = 'CuisineTypeIds';
+                            hiddenInput.value = id;
+                            form.appendChild(hiddenInput);
+                        }
+                    });
+                    
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('allCategoriesModal'));
+                    if (modal) {
+                        modal.hide();
+                    }
+                    
+                    console.log("Submitting form with updated selections");
+                    // Submit filter form
+                    form.submit();
+                });
+            }
+
+            document.querySelectorAll('input[name="CuisineTypeIds"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    // Auto-submit form when cuisine type changes
+                    setTimeout(() => {
+                        document.getElementById('filter-form').submit();
+                    }, 100);
+                });
+            });
+        });         
+        function initializeFromUrlParams() {
+            console.log("Initializing from URL parameters");
+            const urlParams = new URLSearchParams(window.location.search);
+            const cuisineTypeIds = urlParams.getAll('CuisineTypeIds');
+            
+            // Skip if no CuisineTypeIds in URL or if there's no filter form
+            if (cuisineTypeIds.length === 0 || !document.getElementById('filter-form')) {
+                console.log("No cuisine IDs in URL or no filter form");
+                return;
+            }
+            
+            console.log("Found cuisine IDs in URL:", cuisineTypeIds);
+            const form = document.getElementById('filter-form');
+            
+            // Update visible checkboxes first
+            document.querySelectorAll('input[name="CuisineTypeIds"][type="checkbox"]').forEach(cb => {
+                cb.checked = cuisineTypeIds.includes(cb.value);
+            });
+            
+            // Create hidden inputs for IDs that don't have visible checkboxes
+            cuisineTypeIds.forEach(id => {
+                const existingCheckbox = form.querySelector(`input[name="CuisineTypeIds"][value="${id}"][type="checkbox"]`);
+                const existingHidden = form.querySelector(`input[name="CuisineTypeIds"][value="${id}"][type="hidden"]`);
+                
+                // Only add if no input exists for this ID yet
+                if (!existingCheckbox && !existingHidden) {
+                    console.log(`Adding hidden input from URL for ID ${id}`);
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'CuisineTypeIds';
+                    hiddenInput.value = id;
+                    form.appendChild(hiddenInput);
+                }
+            });
+        }
+          // Restaurant card interaction with map
+        document.addEventListener('DOMContentLoaded', function() {            
+            // Initialize hidden inputs from URL parameters
+            initializeFromUrlParams();
+        });
+    </script>    <!-- Mapbox GL JS -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.js"></script>    <!-- Spiderifier Library -->
+    <script src="~/lib/spiderifier/mapboxgl-spiderifier.js" asp-append-version="true"></script>
+    <!-- Map with Clustering and Spiderifier JS -->
+    <script src="~/js/search/search-map.js" asp-append-version="true"></script>
+    <!-- Pagination JS -->
+    <script src="~/js/search/pagination.js" asp-append-version="true"></script>
+}

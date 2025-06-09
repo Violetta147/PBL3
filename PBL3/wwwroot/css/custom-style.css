@@ -1,0 +1,36 @@
+﻿/* wwwroot/css/custom-styles.css */
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap');
+
+body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+}
+
+.hero-gradient {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.form-section {
+    margin-top: -100px; /* Điều chỉnh nếu cần sau khi có header của _Layout.cshtml */
+}
+
+.form-card {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.section-title {
+    position: relative;
+    padding-left: 16px;
+}
+
+    .section-title:before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: #3B82F6; /* Giả sử đây là màu primary của bạn */
+        border-radius: 4px;
+    }

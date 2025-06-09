@@ -1,0 +1,160 @@
+﻿@using PBL3.ViewModel.Restaurant
+@model IEnumerable<MyRestaurantListItemViewModel>
+@using PBL3.Extensions
+@{
+    ViewData["Title"] = "Quản lý Doanh nghiệp"; // Đổi tiêu đề cho phù hợp hơn
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/my-restaurants-dashboard.css" asp-append-version="true" /> @* File CSS mới cho layout này *@
+    @* Các CSS khác nếu cần, ví dụ cho card nhà hàng vẫn có thể dùng chung từ file cũ hoặc gộp vào file mới *@
+}
+
+<div class="dashboard-container container-fluid my-4">
+    <div class="row">
+        @* --- SIDEBAR BÊN TRÁI --- *@
+        <nav class="col-md-4 col-lg-3 d-md-block sidebar bg-light shadow-sm p-4 vh-100-md position-sticky-md">
+            <div class="sidebar-sticky d-flex flex-column h-100">
+                <div class="mb-4">
+                    <a asp-controller="Business" asp-action="Register" class="btn btn-primary-modern w-100">
+                        <i class="fas fa-plus-circle me-2"></i>Thêm Doanh nghiệp
+                    </a>
+                </div>
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-2 text-muted text-uppercase">
+                    <span>Tổng quan</span>
+                </h6>
+                <ul class="nav flex-column mb-auto">
+                    <li class="nav-item stat-item">
+                        <div class="stat-icon"><i class="fas fa-store"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-number">@(Model != null ? Model.Count() : 0)</div>
+                            <div class="stat-label">Tổng Doanh nghiệp</div>
+                        </div>
+                    </li>
+                    <li class="nav-item stat-item">
+                        <div class="stat-icon"><i class="fas fa-star"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-number">@(Model != null && Model.Any() && Model.Where(r => r.ReviewCount > 0).Any() ? Model.Where(r => r.ReviewCount > 0).Average(r => r.AverageRating).ToString("N1") : "N/A")</div>
+                            <div class="stat-label">Đánh giá TB</div>
+                        </div>
+                    </li>
+                    <li class="nav-item stat-item">
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-number">@(Model != null && Model.Any() ? Model.Sum(r => r.ReviewCount).ToString("N0") : "0")</div>
+                            <div class="stat-label">Tổng Lượt ĐG</div>
+                        </div>
+                    </li>
+                    <li class="nav-item stat-item">
+                        <div class="stat-icon"><i class="fas fa-eye"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-number">N/A</div> @* Cần logic để đếm lượt xem *@
+                            <div class="stat-label">Lượt xem</div>
+                        </div>
+                    </li>
+                </ul>
+                <hr class="my-3">
+                <div class="mt-auto">
+                    <button type="button" class="btn btn-outline-danger w-100" id="tempCloseAllBusinessesBtn">
+                        <i class="fas fa-store-slash me-2"></i>Tạm đóng tất cả
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        @* --- KHU VỰC NỘI DUNG CHÍNH BÊN PHẢI --- *@
+        <main class="col-md-8 ms-sm-auto col-lg-9 px-md-4 py-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2 page-title">@ViewData["Title"]</h1>
+                @if (ViewData["UserDisplayName"] != null)
+                {
+                    <p class="welcome-text mb-0">Chào mừng, @ViewData["UserDisplayName"]!</p>
+                }
+            </div>
+
+            @if (TempData["SuccessMessage"] != null) { /* ... alert ... */ }
+
+            @if (Model == null || !Model.Any())
+            {
+                @* ... Empty State ... *@
+            }
+            else
+            {
+                <div class="restaurant-list-horizontal" id="restaurantGrid">
+                    @foreach (var restaurant in Model)
+                    {
+                        <div class="restaurant-card">
+                            <div class="restaurant-image-container">
+                                <img src="@(!string.IsNullOrEmpty(restaurant.MainImageUrl) ? restaurant.MainImageUrl : "/images/placeholder-restaurant.png")" alt="@restaurant.Name" class="restaurant-image">
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="restaurant-name">@restaurant.Name</h5>
+                                <div class="restaurant-address mb-2">
+                                    <i class="fas fa-map-marker-alt fa-fw"></i>
+                                    <span>@restaurant.FullAddressText</span>
+                                </div>
+                                <div class="status-badge @(restaurant.Status == RestaurantStatus.Open ? "status-open" : (restaurant.Status == RestaurantStatus.TemporarilyClosed ? "status-temp-closed" : "status-closed")) mb-2">
+                                    <i class="@(restaurant.Status == RestaurantStatus.Open ? "fas fa-circle pulse-animation" : (restaurant.Status == RestaurantStatus.TemporarilyClosed ? "fas fa-pause-circle" : "fas fa-times-circle"))"></i>
+                                    <span>@restaurant.StatusDisplayName</span> @* Sử dụng StatusDisplayName từ ViewModel *@
+                                </div>
+                                <div class="restaurant-stats">
+                                    <div class="rating-info">
+                                        <i class="fas fa-star rating-star"></i>
+                                        <span>@restaurant.AverageRating.ToString("N1") (@restaurant.ReviewCount đánh giá)</span>
+                                    </div>
+                                    <div class="created-date">
+                                        Tạo: @restaurant.CreatedAt.ToString("dd/MM/yyyy")
+                                    </div>
+                                </div>
+                                <div class="action-buttons mt-auto">
+                                    <a href="@restaurant.ViewDetailsUrl" class="btn-action btn-view" title="Xem chi tiết"><i class="fas fa-eye"></i> Xem</a>
+                                    <a href="@restaurant.EditRestaurantUrl" class="btn-action btn-edit" title="Sửa thông tin"><i class="fas fa-edit"></i> Sửa</a>
+                                    <a href="@restaurant.ManageMenuUrl" class="btn-action btn-menu" title="Quản lý thực đơn"><i class="fas fa-utensils"></i> Menu</a>
+                                    @* Thêm các nút khác nếu cần *@
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </main>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        // JavaScript cho hiệu ứng (nếu có) hoặc tương tác sidebar (nếu cần)
+        $(document).ready(function() {
+            // Logic cho nút "Tạm đóng tất cả doanh nghiệp" (ví dụ)
+            $('#tempCloseAllBusinessesBtn').on('click', function() {
+                if (confirm("Bạn có chắc chắn muốn tạm đóng tất cả các doanh nghiệp của mình không?")) {
+                    // Gọi API hoặc action để thực hiện hành động này
+                    alert("Chức năng đang được phát triển!");
+                }
+            });
+
+            // Giữ lại JS cho ripple effect hoặc animation nếu bạn đã có và muốn dùng
+            // Ví dụ:
+            document.querySelectorAll('.btn-modern, .btn-action').forEach(button => {
+                button.addEventListener('click', function (e) {
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - (size / 2);
+                    const y = e.clientY - rect.top - (size / 2);
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    ripple.classList.add('ripple'); // Đảm bảo class 'ripple' được định nghĩa trong CSS
+                    const oldRipple = this.getElementsByClassName('ripple')[0];
+                    if (oldRipple) { oldRipple.remove(); }
+                    this.appendChild(ripple);
+                });
+            });
+        });
+    </script>
+}

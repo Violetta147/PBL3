@@ -1,0 +1,247 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using PBL3.Models
+
+
+@inject SignInManager<AppUser> SignInManager
+@inject UserManager<AppUser> UserManager
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - PBL3</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/PBL3.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/leaflet-maps.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/custom-style.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/nav-bar.css" asp-append-version="true" />
+    <!-- Add Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Z-index fix for map and UI overlays -->
+    <link rel="stylesheet" href="~/css/z-index-fix.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+
+<body class="@ViewData["BodyClass"]">
+    <!-- Add a wrapper div with display: flex for proper layout -->
+    <div class="page-wrapper" style="display: flex; flex-direction: column; min-height: 100vh;">
+        <header>
+            <nav class="fishloot-navbar">
+                <div class="container-fluid">
+                    <div class="d-flex align-items-center justify-content-between w-100">
+                        <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                            <img src="~/images/trans_bg.png" alt="fishloot" class="fishloot-logo"
+                                onerror="this.src='/api/placeholder/120/36'; this.onerror=null;">
+                            <span class="fishloot-name">FISHLOOT</span>
+                        </a>
+                        <form action="@Url.Action("Index", "Search")" method="get" class="fishloot-search-container"
+                            id="navbarSearchForm" autocomplete="off">
+                            <div class="search-inputs-group">
+                                <input type="text" name="searchTerm" class="fishloot-search-input" autocomplete="off"
+                                    autocapitalize="off" autocorrect="off" spellcheck="false"
+                                    placeholder="Kinda Hungry huh? Go loot some fishes!" />
+                                <div class="location-input-container">
+                                    <input type="text" name="Address" id="navbarLocationInput"
+                                        class="fishloot-search-location" autocomplete="off" autocapitalize="off"
+                                        autocorrect="off" spellcheck="false"
+                                        placeholder="Even how large the ocean are, we can still reach you" />
+                                    <div id="location-suggestion" class="location-dropdown">
+                                        <button type="button" id="navbarUseCurrentLocation" class="dropdown-item"><i
+                                                class="fas fa-map-marker-alt"></i> Sử dụng vị trí hiện tại</button>
+                                    </div>
+                                </div>
+                                <button class="fishloot-search-button" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <input type="hidden" name="lat" id="navbarLat" />
+                            <input type="hidden" name="lng" id="navbarLng" />
+                        </form>
+
+                        <div class="fishloot-nav-links">
+                            <a asp-controller="Home" asp-action="HandleLootYourBusiness" class="fishloot-nav-link">Loot your business</a>
+                            <a asp-controller="Reviews" asp-action="HandleWriteReview" class="fishloot-nav-link">Write a Review</a>
+                            @if (SignInManager.IsSignedIn(User))
+                            {
+                                <a asp-controller="Reviews" asp-action="MyReviews" class="fishloot-nav-link">Đánh giá của tôi</a>
+                                <div class="dropdown">
+                                    @{
+                                        var user = await UserManager.GetUserAsync(User);
+                                        var avatarUrl = !string.IsNullOrEmpty(user?.AvatarUrl) 
+                                            ? user.AvatarUrl 
+                                            : "/images/default-avatar.svg";
+                                    }
+                                    <button class="user-avatar-button" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <img src="@avatarUrl" alt="@UserManager.GetUserName(User)" class="user-avatar" 
+                                             onerror="this.src='/images/default-avatar.svg'; this.onerror=null;">
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                        <li class="px-3 py-2 d-flex align-items-center">
+                                            <div class="ms-2">
+                                                <div class="fw-bold">@UserManager.GetUserName(User)</div>
+                                                <small class="text-muted">@user?.Email</small>
+                                            </div>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-controller="Account" asp-action="Manage">
+                                            <i class="fas fa-user-cog me-2"></i>Quản lý tài khoản
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form asp-controller="Account" asp-action="Logout" method="post" id="logoutForm" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="dropdown-item">
+                                                    <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            }
+                            else
+                            {
+                                <button type="button" class="fishloot-login-button" id="loginModalButton">
+                                    Đăng Nhập
+                                </button>
+                                <button type="button" class="fishloot-signup-button" id="registerModalButton">
+                                    Đăng Ký
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        
+        <!-- Main content will auto-expand to fill space -->
+        <div style="flex: 1 1 auto; display: flex; flex-direction: column;">
+            @if (ViewData["BodyClass"]?.ToString() == "search-page")
+            {
+                <main role="main" style="padding: 0; margin: 0;">
+                    @RenderBody()
+                </main>
+            }
+            else
+            {
+                <div class="container">
+                    <main role="main" class="pb-3">
+                        @RenderBody()
+                    </main>
+                </div>
+            }
+        </div>        <footer class="border-top footer text-muted" style="flex-shrink: 0; margin-top: 0;">
+            <div class="container">
+                © 2025 - PBL3 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            </div>
+        </footer>
+    </div> <!-- End page-wrapper -->    
+    <!-- Modal Placeholders -->
+    <div id="loginModalPlaceholder"></div>
+    <div id="registerModalPlaceholder"></div>
+    
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @* Search functionality scripts *@
+    <script src="~/js/search/search-storage.js" asp-append-version="true"></script>
+    <script src="~/js/search/search-validation.js" asp-append-version="true"></script>
+    <script src="~/js/search/search-core.js" asp-append-version="true"></script>
+    <script src="~/js/search/search-ui.js" asp-append-version="true"></script>
+    <script src="~/js/search/search-init.js" asp-append-version="true"></script>    @* Script để parse validation cho form trong modal nếu dùng jQuery Unobtrusive Validation *@
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        $(document).ready(function () {
+            // --- XỬ LÝ HIỂN THỊ LOGIN MODAL CHO "LOOT YOUR BUSINESS" (QUA TEMPDATA) ---
+            var showLoginModalForLootBusiness = '@TempData["ShowLoginModal"]'; // Razor sẽ render 'True' hoặc 'False' (chuỗi) hoặc rỗng
+            var loginReturnUrlForLootBusiness = '@Html.Raw(TempData["LoginReturnUrl"]?.ToString() ?? "")'; // Lấy return URL từ TempData
+
+            // Chuyển đổi chuỗi 'True'/'False' thành boolean
+            // DÒNG CODE MỚI, AN TOÀN HƠN
+            var shouldShowLoginModal = (showLoginModalForLootBusiness.toLowerCase() === 'true');
+
+            if (shouldShowLoginModal && loginReturnUrlForLootBusiness) {
+                // console.log("TempData Trigger: ShowLoginModal =", shouldShowModal, "ReturnUrl =", loginReturnUrlByTempData, "ActionDesc=", actionDescriptionForTempData);
+                // Gọi hàm showLoginModal từ site.js (nếu có)
+                // Hàm này chịu trách nhiệm load nội dung modal và hiển thị nó
+                if (typeof window.showLoginModal === "function") {
+                    window.showLoginModal(loginReturnUrlForLootBusiness);
+                } else {
+                    console.warn("Hàm showLoginModal không được định nghĩa trong site.js. Thực hiện fallback.");
+                    // Fallback: Tải trực tiếp và hiển thị modal nếu hàm showLoginModal không tồn tại
+                    // Bạn có thể copy logic load modal từ site.js vào đây nếu muốn nó độc lập
+                    var $loginPlaceholder = $('#loginModalPlaceholder');
+                    if ($loginPlaceholder.length === 0) {
+                         $('body').append('<div id="loginModalPlaceholder"></div>'); // Đảm bảo placeholder tồn tại
+                         $loginPlaceholder = $('#loginModalPlaceholder');
+                    }
+
+                    // Đảm bảo modal instance được tạo duy nhất
+                    var $modalInstance = $('#loginModalInstance');
+                    if ($modalInstance.length === 0) {
+                        $loginPlaceholder.html('<div class="modal fade" id="loginModalInstance" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"></div></div></div>');
+                        $modalInstance = $('#loginModalInstance');
+                    }
+                    var $modalContent = $modalInstance.find('.modal-content');
+                    var urlToLoadLoginModal = "@Url.Action("LoginModal", "Account")" + "?returnUrl=" + encodeURIComponent(loginReturnUrlForLootBusiness);
+
+                    $modalContent.load(urlToLoadLoginModal, function (response, status, xhr) {
+                        if (status == "error") {
+                            console.error("Fallback Error loading login modal: " + xhr.status + " " + xhr.statusText);
+                            // Chuyển hướng đến trang login đầy đủ nếu load modal lỗi
+                            window.location.href = '@Url.Page("/Account/Login", new { area = "Identity" })' + '?returnUrl=' + encodeURIComponent(loginReturnUrlForLootBusiness);
+                            return;
+                        }
+                        // Re-parse validation cho form trong modal
+                        var form = $modalContent.find("form"); // Tìm form bất kỳ trong modal content
+                        if (form.length && typeof $.validator !== 'undefined' && typeof $.validator.unobtrusive !== 'undefined') {
+                            form.removeData('validator');
+                            form.removeData('unobtrusiveValidation');
+                            $.validator.unobtrusive.parse(form);
+                        }
+                        var modal = new bootstrap.Modal($modalInstance[0]);
+                        modal.show();
+                    });
+                }
+            }
+
+            // --- LOGIC CHO CÁC NÚT LOGIN/REGISTER CHUNG (NẾU CÓ TRONG LAYOUT) ---
+            // Giả sử bạn có các hàm này trong site.js hoặc muốn định nghĩa ở đây
+            // Nút Login chung
+            $('#loginModalButton').on('click', function () {
+                var returnUrl = $(this).data('return-url') || window.location.pathname + window.location.search;
+                if (typeof window.showLoginModal === "function") {
+                    window.showLoginModal(returnUrl);
+                } else {
+                    console.warn("Hàm showLoginModal không được định nghĩa.");
+                    // Fallback tương tự như trên nếu cần
+                }
+            });
+
+            // Nút Register chung
+            $('#registerModalButton').on('click', function () {
+                var returnUrl = $(this).data('return-url') || window.location.pathname + window.location.search;
+                if (typeof window.showRegisterModal === "function") {
+                    window.showRegisterModal(returnUrl);
+                } else {
+                    console.warn("Hàm showRegisterModal không được định nghĩa.");
+                    // Fallback tương tự nếu cần
+                }
+            });
+        });
+    </script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bs5-lightbox@1.8.4/dist/index.bundle.min.js"></script>
+</body>
+</html>

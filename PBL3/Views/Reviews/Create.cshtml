@@ -1,0 +1,111 @@
+﻿@model PBL3.ViewModel.Review.CreateReviewViewModel
+@{
+    ViewData["Title"] = $"Viết đánh giá cho {Model.RestaurantName}";
+    // Layout = ...
+}
+
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Viết đánh giá cho: @Model.RestaurantName</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" asp-controller="Reviews" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <input type="hidden" asp-for="RestaurantId" />
+                        @* RestaurantName chỉ để hiển thị, không cần input *@
+
+                        <div class="mb-3">
+                            <label asp-for="Rating" class="form-label fw-bold"></label>
+                            <div id="starRating" class="fs-3">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <i class="far fa-star star-rating-item" data-value="@i" style="cursor:pointer; color: #FFD700;"></i>
+                                }
+                            </div>
+                            <input type="hidden" asp-for="Rating" id="ratingValue" /> @* Input ẩn để lưu giá trị sao *@
+                            <span asp-validation-for="Rating" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Comment" class="form-label fw-bold"></label>
+                            <textarea asp-for="Comment" class="form-control" rows="5" placeholder="Chia sẻ cảm nhận của bạn về nhà hàng..."></textarea>
+                            <span asp-validation-for="Comment" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Photos" class="form-label fw-bold"></label>
+                            <input asp-for="Photos" type="file" multiple class="form-control" accept="image/png, image/jpeg, image/gif" />
+                            <span asp-validation-for="Photos" class="text-danger"></span>
+                            <small class="form-text text-muted">Bạn có thể chọn nhiều ảnh (tối đa 5 ảnh, mỗi ảnh không quá 5MB - ví dụ giới hạn).</small>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>Gửi Đánh Giá
+                            </button>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a asp-controller="Restaurants" asp-action="Details" asp-route-id="@Model.RestaurantId" class="btn btn-link">Quay lại nhà hàng</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            let currentRating = 0;
+            const stars = $('#starRating .star-rating-item');
+            const ratingInput = $('#ratingValue');
+
+            // Khởi tạo trạng thái sao nếu có giá trị ban đầu (khi form load lại với lỗi)
+            const initialRating = parseInt(ratingInput.val());
+            if (!isNaN(initialRating) && initialRating > 0) {
+                currentRating = initialRating;
+                updateStars(currentRating);
+            }
+
+            stars.on('mouseover', function () {
+                const rating = $(this).data('value');
+                highlightStars(rating);
+            });
+
+            stars.on('mouseout', function () {
+                highlightStars(currentRating); // Quay lại rating đã chọn
+            });
+
+            stars.on('click', function () {
+                currentRating = $(this).data('value');
+                ratingInput.val(currentRating); // Cập nhật input ẩn
+                updateStars(currentRating);
+                // Trigger validation cho rating nếu cần
+                ratingInput.trigger('change'); // Hoặc một event khác mà validation lắng nghe
+            });
+
+            function highlightStars(rating) {
+                stars.each(function (index) {
+                    if ((index + 1) <= rating) {
+                        $(this).removeClass('far').addClass('fas'); // fas là sao đầy
+                    } else {
+                        $(this).removeClass('fas').addClass('far'); // far là sao rỗng
+                    }
+                });
+            }
+            function updateStars(rating) {
+                 currentRating = rating; // Cập nhật rating hiện tại
+                 highlightStars(rating);
+            }
+        });
+    </script>
+}

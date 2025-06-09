@@ -1,0 +1,53 @@
+@model IEnumerable<PBL3.Models.Review>
+
+<div class="card-body">
+    @if (Model == null || !Model.Any())
+    {
+        <div class="text-center py-5">
+            <div class="mb-3">
+                <i class="fas fa-comment-slash fa-3x text-muted"></i>
+            </div>
+            <h5>Chưa có đánh giá nào</h5>
+            <p class="text-muted">Các đánh giá từ khách hàng về nhà hàng của bạn sẽ hiển thị tại đây.</p>
+        </div>
+    }
+    else
+    {
+        <div class="list-group list-group-flush">
+            @foreach (var review in Model)
+            {
+                <div class="list-group-item border-0 border-bottom py-4 px-0">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <h6 class="mb-0 fw-bold">@review.Restaurant.Name</h6>
+                            <div class="text-muted small">
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                @review.ReviewDate.ToString("dd/MM/yyyy HH:mm")
+                            </div>
+                        </div>
+                        <div class="rating-stars">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="fas fa-star @(i <= review.Rating ? "text-warning" : "text-muted")"></i>
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="mb-2">@review.Comment</div>
+                    
+                    @if (review.Photos != null && review.Photos.Any())
+                    {
+                        <div class="review-photos d-flex flex-wrap gap-2 mt-3">
+                            @foreach (var photo in review.Photos)
+                            {
+                                <a href="@photo.Url" target="_blank" class="review-photo-thumbnail">
+                                    <img src="@photo.Url" alt="Ảnh đánh giá" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;" />
+                                </a>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>

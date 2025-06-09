@@ -1,0 +1,141 @@
+﻿@model PBL3.ViewModel.Menu.MenuItemEditViewModel
+
+<form id="menuItemForm"
+      asp-controller="Business"
+      asp-action="@(Model.Id == 0 ? "CreateMenuItem" : "EditMenuItem")"
+      asp-route-id="@(Model.Id == 0 ? null : Model.Id)"
+      method="post"
+      enctype="multipart/form-data"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="handleItemFormSuccess"
+      data-ajax-failure="handleItemFormFailure"
+      data-ajax-loading="#loadingIndicatorItem">
+
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger validation-summary-errors" role="alert" style="display:none;">
+        @* Lỗi sẽ được JS chèn vào đây nếu cần *@
+    </div>
+
+    @* Các trường ẩn cần thiết cho binding và logic *@
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="MenuSectionId" />
+    <input type="hidden" asp-for="RestaurantId" />
+    <input type="hidden" asp-for="CurrentMainImagePublicId" />
+    <input type="hidden" asp-for="CurrentMainImageUrl" />
+
+
+    @if (!string.IsNullOrEmpty(Model.MenuSectionName))
+    {
+        <div class="alert alert-light p-2 mb-3 small">
+            @(Model.Id == 0 ? "Tạo món ăn mới cho mục:" : "Chỉnh sửa món ăn của mục:")
+            <strong class="text-primary">@Model.MenuSectionName</strong>
+            (@(Model.RestaurantName != null ? $"Nhà hàng: {Model.RestaurantName}" : ""))
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-12 mb-3">
+            <label asp-for="Name" class="form-label fw-bold"></label>
+            <input asp-for="Name" class="form-control form-control-modern" placeholder="Ví dụ: Phở Bò Đặc Biệt" required />
+            <span asp-validation-for="Name" class="text-danger validation-error"></span>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label fw-bold"></label>
+        <textarea asp-for="Description" class="form-control form-control-modern" rows="3" placeholder="Mô tả ngắn về món ăn, thành phần..."></textarea>
+        <span asp-validation-for="Description" class="text-danger validation-error"></span>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label asp-for="Price" class="form-label fw-bold"></label>
+            <div class="input-group">
+                <input asp-for="Price" type="number" step="1000" min="0" class="form-control form-control-modern" placeholder="Ví dụ: 50000" required />
+                <span class="input-group-text">VNĐ</span>
+            </div>
+            <span asp-validation-for="Price" class="text-danger validation-error"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="DisplayOrder" class="form-label fw-bold"></label>
+            <input asp-for="DisplayOrder" type="number" min="0" class="form-control form-control-modern" placeholder="Để trống nếu muốn tự động" />
+            <span asp-validation-for="DisplayOrder" class="text-danger validation-error"></span>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="form-check form-switch">
+                <input asp-for="IsAvailable" class="form-check-input" type="checkbox" role="switch" id="itemIsAvailableSwitch" />
+                <label asp-for="IsAvailable" class="form-check-label" for="itemIsAvailableSwitch"></label>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-check form-switch">
+                <input asp-for="IsSignatureDish" class="form-check-input" type="checkbox" role="switch" id="itemIsSignatureDishSwitch" />
+                <label asp-for="IsSignatureDish" class="form-check-label" for="itemIsSignatureDishSwitch"></label>
+            </div>
+        </div>
+    </div>
+
+    @* Ảnh Món Ăn *@
+    <div class="mb-3">
+        <label asp-for="NewMainImageFile" class="form-label fw-bold"></label>
+        @if (!string.IsNullOrEmpty(Model.CurrentMainImageUrl))
+        {
+            <div class="mb-2 current-image-container">
+                <img src="@Model.CurrentMainImageUrl" alt="Ảnh món ăn hiện tại" style="max-width: 150px; max-height: 150px; border-radius: 8px;" class="img-thumbnail d-block" />
+                <small class="text-muted">Ảnh hiện tại. Chọn file mới nếu muốn thay thế.</small>
+            </div>
+        }
+        <input asp-for="NewMainImageFile" type="file" class="form-control form-control-modern" accept="image/jpeg, image/png, image/gif" />
+        <span asp-validation-for="NewMainImageFile" class="text-danger validation-error"></span>
+    </div>
+
+
+    @* Phân Loại Món Ăn (Categories) *@
+    <div class="mb-3">
+        <label asp-for="SelectedCategoryIds" class="form-label fw-bold"></label>
+        @if (Model.AvailableCategories != null && Model.AvailableCategories.Any())
+        {
+            <div class="checkbox-list-container mt-2" style="max-height: 200px; overflow-y: auto; border: 1px solid #ced4da; padding: 10px; border-radius: 8px; background-color: #f8f9fa;">
+                @foreach (var category in Model.AvailableCategories)
+                {
+                    <div class="form-check checkbox-list-item-modern">
+                        @* Sử dụng class của Bootstrap nếu có *@
+                        <input type="checkbox" name="SelectedCategoryIds" value="@category.Id"
+                               id="cat-item-@category.Id" class="form-check-input"
+                               checked="@category.IsSelected" />
+                        <label for="cat-item-@category.Id" class="form-check-label ms-2">
+                            @if (!string.IsNullOrEmpty(category.IconUrl))
+                            {
+                                <img src="@category.IconUrl" alt="" width="18" height="18" class="me-1" style="vertical-align: middle;" />
+                            }
+                            @category.Name
+                        </label>
+                    </div>
+                }
+            </div>
+            <span asp-validation-for="SelectedCategoryIds" class="text-danger validation-error"></span>
+        }
+        else
+        {
+            <p class="text-muted">Không có phân loại nào để chọn. Vui lòng <a asp-controller="AdminCategories" asp-action="Index">thêm phân loại</a> trước (liên kết ví dụ).</p>
+        }
+    </div>
+
+
+    <div class="modal-footer mt-4 p-0 pt-3 border-top">
+        @* Thêm pt-3 cho footer và border-top *@
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+        <button type="submit" class="btn btn-primary-modern btn-sm">
+            <i class="fas fa-save me-1"></i> @(Model.Id == 0 ? "Tạo Món Ăn" : "Lưu Thay Đổi")
+        </button>
+        <div id="loadingIndicatorItem" style="display:none;" class="ms-2">
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Đang xử lý...</span>
+            </div>
+        </div>
+    </div>
+</form>

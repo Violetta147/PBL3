@@ -1,0 +1,54 @@
+﻿@model PBL3.ViewModel.Admin.UserEditRolesViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = $"Chỉnh sửa Vai trò cho {ViewData["UserNameForEdit"] ?? Model.UserName}";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">@ViewData["Title"]</h1>
+    <div>
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại Danh sách
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="EditRoles" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            <input type="hidden" asp-for="UserId" />
+            @* Không cần input cho UserName, DisplayName vì chỉ hiển thị *@
+
+            <p>Chọn các vai trò cho người dùng: <strong>@Model.DisplayName</strong> (@Model.UserName)</p>
+
+            @if (Model.Roles != null && Model.Roles.Any())
+            {
+                    <div class="list-group mb-3">
+                    @foreach (var roleVM in Model.Roles)
+                    {
+                                <label class="list-group-item list-group-item-action d-flex align-items-center">
+                                    <input type="checkbox" name="SelectedRoleNames" value="@roleVM.RoleName"
+                                           class="form-check-input me-2" @(roleVM.IsSelected ? "checked" : "")
+                            @(roleVM.RoleName == "Admin" && Model.UserName == User.Identity.Name ? "disabled" : "") /> @* Không cho tự bỏ vai trò Admin của mình nếu là Admin duy nhất (cần logic phức tạp hơn ở server) *@
+                            @roleVM.RoleName
+                                    <input type="hidden" name="Roles[@Model.Roles.IndexOf(roleVM)].RoleId" value="@roleVM.RoleId" />
+                                    <input type="hidden" name="Roles[@Model.Roles.IndexOf(roleVM)].RoleName" value="@roleVM.RoleName" />
+                            @* Input ẩn IsSelected không cần thiết vì SelectedRoleNames sẽ được bind *@
+                                </label>
+                    }
+                    </div>
+                     <span asp-validation-for="SelectedRoleNames" class="text-danger"></span>
+            }
+            else
+            {
+                    <p class="text-muted">Không có vai trò nào để gán.</p>
+            }
+
+            <div class="form-group mt-3">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Lưu thay đổi</button>
+            </div>
+        </form>
+    </div>
+</div>

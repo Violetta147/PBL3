@@ -1,0 +1,77 @@
+﻿@model PBL3.ViewModel.Menu.MenuEditViewModel
+
+@* Không cần @{ Layout = null; } vì nó sẽ được render trong modal *@
+
+<form id="menuForm" asp-action="@(Model.Id == 0 ? "CreateMenu" : "EditMenu")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="handleMenuFormSuccess"
+      data-ajax-failure="handleMenuFormFailure"
+      data-ajax-loading="#loadingIndicator">
+    @* Thêm data-ajax-* cho jQuery Unobtrusive AJAX *@
+
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert" style="display:none;"></div>
+
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="RestaurantId" />
+    @* RestaurantName có thể hiển thị nếu cần, nhưng không phải là input *@
+    @if (!string.IsNullOrEmpty(Model.RestaurantName) && Model.Id == 0) // Chỉ hiển thị khi tạo mới cho nhà hàng cụ thể
+    {
+        <p class="text-muted small">Tạo thực đơn cho nhà hàng: <strong>@Model.RestaurantName</strong></p>
+    }
+
+
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label fw-bold"></label>
+        <input asp-for="Title" class="form-control form-control-modern" required />
+        <span asp-validation-for="Title" class="text-danger validation-error"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label fw-bold"></label>
+        <textarea asp-for="Description" class="form-control form-control-modern" rows="3"></textarea>
+        <span asp-validation-for="Description" class="text-danger validation-error"></span>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label asp-for="DisplayOrder" class="form-label fw-bold"></label>
+            <input asp-for="DisplayOrder" type="number" min="0" class="form-control form-control-modern" />
+            <span asp-validation-for="DisplayOrder" class="text-danger validation-error"></span>
+        </div>
+        <div class="col-md-6 mb-3 d-flex align-items-center">
+            <div class="form-check form-switch form-switch-modern">
+                <input asp-for="IsActive" class="form-check-input" type="checkbox" role="switch" id="menuIsActiveSwitch" />
+                <label asp-for="IsActive" class="form-check-label" for="menuIsActiveSwitch"></label>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer mt-3 p-0 border-top-0">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button type="submit" class="btn btn-primary-modern">
+            <i class="fas fa-save me-2"></i> @(Model.Id == 0 ? "Tạo Thực Đơn" : "Lưu Thay Đổi")
+        </button>
+        <div id="loadingIndicator" style="display:none;">
+            <div class="spinner-border spinner-border-sm text-primary ms-2" role="status">
+                <span class="visually-hidden">Đang xử lý...</span>
+            </div>
+        </div>
+    </div>
+</form>
+
+@* Script này cần được load lại mỗi khi partial view được load vào modal
+   để jQuery Unobtrusive Validation hoạt động cho form mới.
+   Cách tốt hơn là gọi $.validator.unobtrusive.parse("#menuForm") trong JS sau khi load.
+*@
+@{
+    <script>
+        // Đảm bảo jQuery Unobtrusive Validation được parse lại cho form này
+        // Điều này quan trọng nếu bạn load partial view bằng AJAX
+        // Nếu bạn đã có logic parse trong manage-menu.js thì có thể không cần ở đây.
+        // if (typeof $ !== 'undefined' && $.validator && $.validator.unobtrusive) {
+        //     $.validator.unobtrusive.parse("#menuForm");
+        // }
+    </script>
+}

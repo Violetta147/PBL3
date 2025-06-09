@@ -1,0 +1,110 @@
+/* 
+ * Z-index Fix for Overlay Issues
+ * This file establishes a proper stacking context hierarchy for the application
+ * to ensure elements like dropdowns and modals always appear above the map.
+ */
+
+/* === Z-INDEX HIERARCHY (from bottom to top) === */
+/*
+ * 0-900:    Base elements (default)
+ * 1000-1499: Map elements (markers, layers, etc.)
+ * 1500-1999: Map controls and special map elements 
+ * 2000-2499: Regular UI elements that should be above map (dropdowns)
+ * 2500-2999: Important UI elements (modals, tooltips)
+ * 3000+:     Critical notifications and overlays
+ */
+
+/* Map container - this establishes the map's base stacking context */
+#map-section {
+    z-index: 900; /* Higher z-index for the map section */
+    position: relative;
+}
+
+#mapbox-container {
+    z-index: 950; /* Base z-index for the map container */
+    position: relative;
+}
+
+/* Mapbox canvas container - internal map elements */
+.mapboxgl-canvas-container {
+    z-index: 1000 !important;
+}
+
+/* Map controls */
+.mapboxgl-ctrl-top-right,
+.mapboxgl-ctrl-top-left,
+.mapboxgl-ctrl-bottom-right,
+.mapboxgl-ctrl-bottom-left {
+    z-index: 1500 !important;
+}
+
+/* Markers and spider legs */
+.spidered-marker-container {
+    z-index: 1300 !important;
+}
+
+.spider-leg-container {
+    z-index: 1200 !important;
+}
+
+.spider-leg-pin {
+    z-index: 1350 !important;
+}
+
+/* Scattered markers should be above spider legs */
+.scattered-marker {
+    z-index: 1400 !important;
+}
+
+/* Popups should be above ALL markers */
+.mapboxgl-popup {
+    z-index: 1800 !important;
+}
+
+/* Special popup types */
+.mapboxgl-popup.spider-popup,
+.mapboxgl-popup.scattered-popup,
+.mapboxgl-popup.restaurant-popup {
+    z-index: 1850 !important; /* Even higher for these special types */
+}
+
+.mapboxgl-popup-content {
+    z-index: 1810 !important;
+    position: relative !important;
+}
+
+.mapboxgl-popup-tip {
+    z-index: 1805 !important;
+}
+
+.mapboxgl-popup-close-button {
+    z-index: 1815 !important;
+    position: relative !important;
+}
+
+/* Dropdown menus in the navbar should be above ALL map elements */
+.location-dropdown {
+    z-index: 2100 !important; /* Ensure this is higher than map elements */
+    position: absolute !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+    border: 1px solid rgba(0,0,0,0.15) !important;
+}
+
+.location-dropdown.show {
+    display: block !important;
+}
+
+/* Make sure all Bootstrap dropdowns appear above map */
+.dropdown-menu {
+    z-index: 2100 !important;
+}
+
+/* Modal backdrops need to be high but below modals */
+.modal-backdrop {
+    z-index: 2500 !important;
+}
+
+/* Modals should be on top of everything except critical notifications */
+.modal {
+    z-index: 2600 !important;
+}

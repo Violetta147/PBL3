@@ -1,0 +1,54 @@
+﻿@model PBL3.ViewModel.Menu.MenuSectionEditViewModel
+
+<form id="menuSectionForm" asp-action="@(Model.Id == 0 ? "CreateMenuSection" : "EditMenuSection")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="handleSectionFormSuccess"
+      data-ajax-failure="handleSectionFormFailure"
+      data-ajax-loading="#loadingIndicatorSection">
+
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert" style="display:none;"></div>
+
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="MenuId" />
+    <input type="hidden" asp-for="RestaurantId" />
+
+    @if (!string.IsNullOrEmpty(Model.MenuName))
+    {
+            <p class="text-muted small">
+            @(Model.Id == 0 ? "Tạo mục mới cho thực đơn:" : "Chỉnh sửa mục của thực đơn:")
+                <strong>@Model.MenuName</strong>
+            </p>
+    }
+
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label fw-bold"></label>
+        <input asp-for="Title" class="form-control form-control-modern" required />
+        <span asp-validation-for="Title" class="text-danger validation-error"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label fw-bold"></label>
+        <textarea asp-for="Description" class="form-control form-control-modern" rows="3"></textarea>
+        <span asp-validation-for="Description" class="text-danger validation-error"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="DisplayOrder" class="form-label fw-bold"></label>
+        <input asp-for="DisplayOrder" type="number" min="0" class="form-control form-control-modern" />
+        <span asp-validation-for="DisplayOrder" class="text-danger validation-error"></span>
+    </div>
+
+    <div class="modal-footer mt-3 p-0 border-top-0">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button type="submit" class="btn btn-primary-modern">
+            <i class="fas fa-save me-2"></i> @(Model.Id == 0 ? "Tạo Mục" : "Lưu Thay Đổi")
+        </button>
+        <div id="loadingIndicatorSection" style="display:none;">
+            <div class="spinner-border spinner-border-sm text-primary ms-2" role="status">
+                <span class="visually-hidden">Đang xử lý...</span>
+            </div>
+        </div>
+    </div>
+</form>

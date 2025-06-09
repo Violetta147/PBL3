@@ -1,0 +1,96 @@
+﻿@* File: Views/Account/CompleteAccount.cshtml *@
+@model PBL3.ViewModel.CompleteAccountViewModel
+@{
+    ViewData["Title"] = "Hoàn tất Tạo Tài khoản";
+    Layout = "_Layout";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        @{
+                            var welcomeName = !string.IsNullOrEmpty(Model.SuggestedDisplayName) ? Model.SuggestedDisplayName : Model.UserName;
+                        }
+                        <h3 class="fw-bold">Chào mừng đến với FishLoot, @welcomeName!</h3>
+                        <p class="text-muted">Hoàn tất bước này để tạo tài khoản của bạn.</p>
+                    </div>
+
+                    <form asp-action="CompleteAccount" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="ReturnUrl" />
+                        <input type="hidden" asp-for="LoginProvider" />
+                        <input type="hidden" asp-for="ProviderKey" />
+                        <input type="hidden" asp-for="ProviderDisplayName" />
+
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" readonly />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        @* UserName người dùng có thể chỉnh sửa từ gợi ý *@
+                        <div class="mb-3">
+                            <label asp-for="UserName" class="form-label"></label>
+                            <input asp-for="UserName" class="form-control" placeholder="Tên người dùng cho FishLoot" />
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label"></label>
+                            <input asp-for="Password" type="password" class="form-control" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="ConfirmPassword" class="form-label"></label>
+                            <input asp-for="ConfirmPassword" type="password" class="form-control" />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label"></label>
+                            <input asp-for="Address" class="form-control" placeholder="Địa chỉ của bạn" />
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Gender" class="form-label"></label>
+                            @* Sử dụng Select Tag Helper cho Enum *@
+                            <select asp-for="Gender" class="form-select" asp-items="Html.GetEnumSelectList<PBL3.Models.GenderType>()">
+                                <option value="">-- Chọn giới tính --</option>
+                            </select>
+                            <span asp-validation-for="Gender" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="DateOfBirth" class="form-label"></label>
+                            <input asp-for="DateOfBirth" type="date" class="form-control" />
+                            <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber" class="form-label"></label>
+                            <input asp-for="PhoneNumber" class="form-control" placeholder="Số điện thoại (tùy chọn)" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg">Hoàn tất và Tạo tài khoản</button>
+                        </div>
+                        <div asp-validation-summary="All" class="text-danger small"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

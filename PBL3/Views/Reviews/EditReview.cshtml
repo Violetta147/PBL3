@@ -1,0 +1,125 @@
+﻿@model PBL3.ViewModel.Review.EditReviewViewModel
+@{
+    ViewData["Title"] = $"Chỉnh sửa đánh giá cho {Model.RestaurantName}";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Chỉnh sửa đánh giá cho: @Model.RestaurantName</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="EditReview" asp-route-id="@Model.ReviewId" asp-controller="Reviews" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <input type="hidden" asp-for="ReviewId" />
+                        <input type="hidden" asp-for="RestaurantId" />
+                        @* RestaurantName chỉ để hiển thị, không cần input *@
+
+                        <div class="mb-3">
+                            <label asp-for="Rating" class="form-label fw-bold"></label>
+                            <div id="starRatingEdit" class="fs-3">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <i class="far fa-star star-rating-item" data-value="@i" style="cursor:pointer; color: #FFD700;"></i>
+                                }
+                            </div>
+                            <input type="hidden" asp-for="Rating" id="ratingValueEdit" />
+                            <span asp-validation-for="Rating" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Comment" class="form-label fw-bold"></label>
+                            <textarea asp-for="Comment" class="form-control" rows="5" placeholder="Chia sẻ cảm nhận của bạn..."></textarea>
+                            <span asp-validation-for="Comment" class="text-danger"></span>
+                        </div>
+
+                        @* Hiển thị và quản lý ảnh hiện tại *@
+                        @if (Model.CurrentPhotos != null && Model.CurrentPhotos.Any())
+                        {
+                            <div class="mb-3">
+                                <p class="fw-bold">Ảnh hiện tại (đánh dấu để xóa):</p>
+                                <div class="row row-cols-3 row-cols-md-4 g-2">
+                                    @for (int i = 0; i < Model.CurrentPhotos.Count; i++)
+                                    {
+                                        <div class="col position-relative">
+                                            <img src="@Model.CurrentPhotos[i].Url" class="img-thumbnail" style="width:100px; height:100px; object-fit:cover;" alt="Ảnh review" />
+                                            <input type="checkbox" asp-for="CurrentPhotos[i].IsMarkedForDeletion" class="form-check-input position-absolute top-0 end-0 m-1 bg-danger border-danger" title="Đánh dấu xóa" />
+                                            <input type="hidden" asp-for="CurrentPhotos[i].Id" />
+                                            <input type="hidden" asp-for="CurrentPhotos[i].Url" />
+                                            <input type="hidden" asp-for="CurrentPhotos[i].CloudinaryPublicId" />
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <div class="mb-4">
+                            <label asp-for="NewPhotos" class="form-label fw-bold"></label>
+                            <input asp-for="NewPhotos" type="file" multiple class="form-control" accept="image/png, image/jpeg, image/gif" />
+                            <span asp-validation-for="NewPhotos" class="text-danger"></span>
+                            <small class="form-text text-muted">Tải lên ảnh mới nếu bạn muốn thay đổi hoặc bổ sung.</small>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>Lưu Thay Đổi
+                            </button>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a asp-action="MyReviews" asp-controller="Reviews" class="btn btn-link">Quay lại danh sách đánh giá</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            let currentEditRating = parseInt($('#ratingValueEdit').val()) || @Model.Rating; // Lấy giá trị rating hiện tại
+            const editStars = $('#starRatingEdit .star-rating-item');
+            const editRatingInput = $('#ratingValueEdit');
+
+            function highlightEditStars(rating) {
+                editStars.each(function (index) {
+                    if ((index + 1) <= rating) {
+                        $(this).removeClass('far').addClass('fas');
+                    } else {
+                        $(this).removeClass('fas').addClass('far');
+                    }
+                });
+            }
+             function updateEditStars(rating) {
+                 currentEditRating = rating;
+                 highlightEditStars(rating);
+            }
+
+            // Khởi tạo sao cho form sửa
+            updateEditStars(currentEditRating);
+
+            editStars.on('mouseover', function () {
+                highlightEditStars($(this).data('value'));
+            });
+
+            editStars.on('mouseout', function () {
+                highlightEditStars(currentEditRating);
+            });
+
+            editStars.on('click', function () {
+                currentEditRating = $(this).data('value');
+                editRatingInput.val(currentEditRating);
+                updateEditStars(currentEditRating);
+                editRatingInput.trigger('change');
+            });
+        });
+    </script>
+}

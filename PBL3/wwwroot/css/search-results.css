@@ -1,0 +1,286 @@
+/* ==== SEARCH PAGE LAYOUT STYLES ==== */
+
+/* Base search page styling */
+body.search-page {
+    margin: 0;
+    padding: 0;
+    padding-bottom: 0; /* No padding-bottom */
+    background-color: #f8f9fa;
+    overflow-x: hidden;
+}
+      
+/* Footer override for search page */
+body.search-page .footer {
+    margin-top: 0;
+}
+
+/* Main frame layout */
+#main-frame {
+    display: flex;
+    flex: 1 1 auto;
+    padding: 20px 0 0 0;
+    margin: 0;
+    max-width: 100%;
+    overflow: visible; /* Allow natural scrolling */
+    min-height: calc(100vh - 80px);
+}
+
+/* Left section layout */
+#left-section {
+    display: flex;
+    width: 60%;
+    flex: none;
+    padding-left: 15px;
+    flex-direction: row;
+    gap: 15px;
+}
+
+/* ==== COLUMN LAYOUT STYLES ==== */
+
+/* Filters column */
+#filters-column {
+    width: 280px;
+    min-width: 280px;
+    height: calc(100vh - 100px);
+    max-height: calc(100vh - 100px);
+    position: sticky;
+    top: 20px;
+    z-index: 1050; /* Highest z-index for filters */
+    overflow-y: auto;
+    align-self: flex-start;
+    background-color: #f8f9fa;
+}
+
+/* Restaurants column */
+#restaurants-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    max-height: none;
+    overflow: visible; /* Allow natural scrolling with browser scrollbar */
+    position: relative;
+    padding-right: 15px;
+    min-height: initial;
+}
+
+/* Restaurant list container */
+#restaurant-list {
+    flex-grow: 1;
+    overflow-y: visible;
+    height: auto;
+    min-height: initial;
+    max-height: none;
+    display: block;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    position: relative;
+    z-index: 1030;
+}
+
+/* Map section */
+#map-section {
+    width: 40%;
+    flex: none;
+    padding-right: 15px;
+    height: calc(100vh - 100px);
+    max-height: calc(100vh - 100px);
+    position: sticky;
+    top: 20px;
+    z-index: 1040; /* High but below filters */
+    display: block;
+}
+
+/* Map container */
+#mapbox-container {
+    height: 100%;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    min-height: 600px;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    /* z-index: 1; */
+}
+
+/* ==== PAGINATION STYLES ==== */
+
+/* Pagination container */
+.pagination-container {
+    display: flex;
+    visibility: visible;
+    justify-content: center;
+    margin: 20px 0 30px 0;
+    width: 100%;
+    z-index: 9999;
+    position: relative;
+    opacity: 1;
+}
+
+/* Pagination navigation */
+.pagination-container nav[aria-label="Pagination"] {
+    display: block;
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Pagination list */
+.pagination-container .pagination {
+    display: flex;
+    visibility: visible;
+    opacity: 1;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 15px 0;
+    padding-left: 0;
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    background-color: #f8f9fa;
+}
+
+/* Pagination item */
+.pagination-container .pagination .page-item {
+    display: inline-block;
+    visibility: visible;
+    opacity: 1;
+    margin: 0 2px;
+    list-style: none;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Pagination link */
+.pagination-container .pagination .page-link {
+    display: flex;
+    visibility: visible;
+    opacity: 1;
+    justify-content: center;
+    align-items: center;
+    min-width: 40px;
+    min-height: 40px;
+    position: relative;
+    z-index: 65;
+    border: 1px solid #dee2e6;
+    background-color: #fff;
+    color: #0d6efd;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+/* Pagination active state */
+.pagination-container .pagination .page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: white;
+    font-weight: 600;
+    z-index: 66;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.5);
+}
+
+/* Pagination hover state */
+.pagination-container .pagination .page-item:hover .page-link {
+    background-color: #e9ecef;
+    border-color: #0d6efd;
+    color: #0d6efd;
+    z-index: 65;
+}
+
+/* ==== RESTAURANT CARD OVERRIDES (SEARCH-SPECIFIC) ==== */
+
+/* Restaurant card width in search results */
+#restaurants-column .restaurant-card {
+    width: 100%;
+}
+
+/* Search-specific button styles */
+.restaurant-item .btn-outline-primary {
+    display: inline-block;
+    width: auto;
+    max-width: fit-content;
+    padding: 0.25rem 0.75rem;
+}
+
+/* Search-specific badge styles */
+.restaurant-card .badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+}
+
+  /* ==== RESPONSIVE STYLES ==== */
+@media (max-width: 992px) {
+    body.search-page {
+        height: auto;
+        overflow: auto;
+    }
+
+    #main-frame,
+    #left-section {
+        flex-direction: column;
+        height: auto;
+        min-height: unset;
+        overflow: visible;
+    }
+
+    #left-section {
+        width: 100%;
+        padding: 0 15px;
+        gap: 0;
+    }
+
+    #filters-column,
+    #restaurants-column,
+    #map-section {
+        position: static;
+        width: 100%;
+        height: auto;
+        overflow-y: visible;
+    }
+
+    #filters-column {
+        margin-bottom: 2rem;
+    }
+    
+    #map-section {
+        height: 400px;
+        padding: 0 15px 15px 15px;
+        margin-bottom: 20px;
+    }
+}
+
+/* ==== VISIBILITY FIXES ==== */
+
+/* Map controls visibility */
+.mapboxgl-ctrl-top-right {
+    z-index: 1045;
+    display: block;
+    visibility: visible;
+}
+
+/* Hide map scale controls */
+.mapboxgl-ctrl.mapboxgl-ctrl-scale {
+    display: none;
+    visibility: hidden;
+}
+
+/* Force visible utility class for JavaScript-manipulated elements */
+.force-visible {
+    display: block;
+    visibility: visible;
+    opacity: 1;
+    z-index: 9999;
+    position: relative;
+}
+
+.pagination.force-visible {
+    display: flex;
+}
+
+.page-link.force-visible {
+    display: flex;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    cursor: pointer;
+}

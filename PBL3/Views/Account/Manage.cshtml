@@ -1,0 +1,454 @@
+@model PBL3.ViewModel.ManageAccountViewModel
+@{
+    ViewData["Title"] = "Quản lý tài khoản";
+}
+
+<div class="container-fluid mt-4 px-4">
+    <div class="row">
+        @await Html.PartialAsync("_ManageAccountPartial", Model)
+        <div class="col-md-8">
+            <!-- Profile Section -->
+            <div id="profile-section" class="section-content">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-bottom">
+                        <h4 class="mb-0">
+                            <i class="fas fa-user me-2"></i>
+                            Hồ sơ cá nhân
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        @if (!string.IsNullOrEmpty(Model.StatusMessage))
+                        {
+                            <div class="alert @(Model.StatusMessage.Contains("Lỗi") ? "alert-danger" : "alert-success") alert-dismissible fade show" role="alert">
+                                @Model.StatusMessage
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        }                        @if (Model.IsViewingOwnProfile)
+                        {
+                            <!-- Profile Information Form (Editable) -->
+                            <form asp-action="Manage" method="post" class="mb-4">
+                                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                                
+                                <input asp-for="Id" type="hidden" />
+                                <input asp-for="IsViewingOwnProfile" type="hidden" />
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="UserName" class="form-label">Tên đăng nhập</label>
+                                            <input asp-for="UserName" class="form-control" readonly />
+                                            <div class="form-text">Tên đăng nhập không thể thay đổi</div>
+                                            <span asp-validation-for="UserName" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="Email" class="form-label">
+                                                Email
+                                                @if (Model.IsEmailConfirmed)
+                                                {
+                                                    <span class="badge bg-success ms-1">
+                                                        <i class="fas fa-check"></i> Đã xác nhận
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning ms-1">
+                                                        <i class="fas fa-exclamation-triangle"></i> Chưa xác nhận
+                                                    </span>
+                                                }
+                                            </label>
+                                            <input asp-for="Email" class="form-control" readonly />
+                                            <div class="form-text">Email không thể thay đổi</div>
+                                            <span asp-validation-for="Email" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="PhoneNumber" class="form-label">Số điện thoại</label>
+                                            <input asp-for="PhoneNumber" class="form-control" />
+                                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="Gender" class="form-label">Giới tính</label>
+                                            <select asp-for="Gender" class="form-select" asp-items="Html.GetEnumSelectList<PBL3.Models.GenderType>()">
+                                                <option value="">Chọn giới tính</option>
+                                            </select>
+                                            <span asp-validation-for="Gender" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="DateOfBirth" class="form-label">Ngày sinh</label>
+                                            <input asp-for="DateOfBirth" class="form-control" type="date" />
+                                            <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>
+                                        Cập nhật thông tin
+                                    </button>
+                                </div>
+                            </form>
+                        }
+                        else
+                        {
+                            <!-- Profile Information Display (Read-only) -->
+                            <div class="mb-4">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Tên đăng nhập</label>
+                                            <div class="form-control-plaintext">@Model.UserName</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">
+                                                Email
+                                                @if (Model.IsEmailConfirmed)
+                                                {
+                                                    <span class="badge bg-success ms-1">
+                                                        <i class="fas fa-check"></i> Đã xác nhận
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning ms-1">
+                                                        <i class="fas fa-exclamation-triangle"></i> Chưa xác nhận
+                                                    </span>
+                                                }
+                                            </label>
+                                            <div class="form-control-plaintext">@Model.Email</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Số điện thoại</label>
+                                            <div class="form-control-plaintext">@(Model.PhoneNumber ?? "Chưa cung cấp")</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Giới tính</label>
+                                            <div class="form-control-plaintext">
+                                                @if (Model.Gender.HasValue)
+                                                {
+                                                    @switch (Model.Gender.Value)
+                                                    {
+                                                        case PBL3.Models.GenderType.Male:
+                                                            <text>Nam</text>
+                                                            break;
+                                                        case PBL3.Models.GenderType.Female:
+                                                            <text>Nữ</text>
+                                                            break;
+                                                        case PBL3.Models.GenderType.Other:
+                                                            <text>Khác</text>
+                                                            break;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <text>Chưa cung cấp</text>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Ngày sinh</label>
+                                            <div class="form-control-plaintext">
+                                                @if (Model.DateOfBirth.HasValue)
+                                                {
+                                                    @Model.DateOfBirth.Value.ToString("dd/MM/yyyy")
+                                                }
+                                                else
+                                                {
+                                                    <text>Chưa cung cấp</text>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>            </div>
+
+            @if (Model.IsViewingOwnProfile)
+            {
+                <!-- Security Section -->
+                <div id="security-section" class="section-content" style="display: none;">
+                    <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-bottom">
+                        <h4 class="mb-0">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            Bảo mật tài khoản
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Two-Factor Authentication Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-shield-alt me-2"></i>
+                                    Xác thực 2 bước
+                                </h5>
+                                
+                                <div class="card shadow-sm border-@(Model.TwoFactorEnabled ? "success" : "warning")">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="card-title mb-1">
+                                                    Trạng thái xác thực 2 bước:
+                                                    @if (Model.TwoFactorEnabled)
+                                                    {
+                                                        <span class="badge bg-success">
+                                                            <i class="fas fa-check"></i> Đã kích hoạt
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-warning">
+                                                            <i class="fas fa-times"></i> Chưa kích hoạt
+                                                        </span>
+                                                    }
+                                                </h6>
+                                                <p class="card-text small text-muted mb-0">
+                                                    @if (Model.TwoFactorEnabled)
+                                                    {
+                                                        <span>Tài khoản của bạn được bảo vệ bằng xác thực 2 bước. Khi đăng nhập, bạn sẽ cần nhập mã xác thực được gửi qua email.</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>Kích hoạt xác thực 2 bước để tăng cường bảo mật cho tài khoản của bạn. Bạn sẽ nhận mã xác thực qua email khi đăng nhập.</span>
+                                                    }
+                                                </p>
+                                            </div>
+                                            <div>
+                                                @if (Model.TwoFactorEnabled)
+                                                {
+                                                    <form asp-action="DisableTwoFactor" method="post" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn tắt xác thực 2 bước? Điều này sẽ làm giảm tính bảo mật của tài khoản.')">
+                                                            <i class="fas fa-shield-alt me-1"></i>
+                                                            Tắt 2FA
+                                                        </button>
+                                                    </form>
+                                                }
+                                                else
+                                                {
+                                                    @if (Model.IsEmailConfirmed)
+                                                    {
+                                                        <form asp-action="EnableTwoFactor" method="post" class="d-inline">
+                                                            @Html.AntiForgeryToken()
+                                                            <button type="submit" class="btn btn-success btn-sm">
+                                                                <i class="fas fa-shield-alt me-1"></i>
+                                                                Kích hoạt 2FA
+                                                            </button>
+                                                        </form>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button type="button" class="btn btn-secondary btn-sm" disabled title="Bạn cần xác nhận email trước khi có thể kích hoạt xác thực 2 bước">
+                                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                                            Cần xác nhận email
+                                                        </button>
+                                                    }
+                                                }
+                                            </div>
+                                        </div>
+
+                                        @if (!Model.IsEmailConfirmed)
+                                        {
+                                            <div class="alert alert-warning mt-3 mb-0" role="alert">
+                                                <i class="fas fa-info-circle me-2"></i>
+                                                <strong>Lưu ý:</strong> Bạn cần xác nhận địa chỉ email trước khi có thể sử dụng tính năng xác thực 2 bước.
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Security Information -->
+                        <div class="mt-4">
+                            <div class="alert alert-info" role="alert">
+                                <h6 class="alert-heading">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Thông tin bảo mật
+                                </h6>
+                                <p class="mb-2">
+                                    <strong>Xác thực 2 bước (Two-Factor Authentication)</strong> giúp bảo vệ tài khoản của bạn bằng cách yêu cầu một mã xác thực bổ sung khi đăng nhập.
+                                </p>
+                                <ul class="mb-0">
+                                    <li>Mã xác thực sẽ được gửi qua email đã đăng ký</li>
+                                    <li>Mã này có hiệu lực trong thời gian ngắn và chỉ sử dụng được một lần</li>
+                                    <li>Kích hoạt 2FA giúp tài khoản an toàn hơn ngay cả khi mật khẩu bị lộ</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Change Password Section -->
+            <div id="change-password-section" class="section-content" style="display: none;">
+                @await Html.PartialAsync("_ChangePasswordPartial", new PBL3.ViewModel.ChangePasswordViewModel())
+            </div>
+
+            <!-- Restaurant Reviews Section -->
+            <div id="reviews-section" class="section-content" style="display: none;">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-bottom">
+                        <h4 class="mb-0">
+                            <i class="fas fa-star me-2"></i>
+                            Đánh giá nhà hàng của bạn
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="restaurant-reviews-container">
+                            <div class="text-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Đang tải...</span>
+                                </div>
+                                <p class="mt-2">Đang tải đánh giá...</p>
+                            </div>
+                        </div>
+                    </div>                </div>
+            </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    
+    <script>
+        $(document).ready(function() {
+            // Section switching functionality
+            $('.list-group-item[data-section]').on('click', function(e) {
+                e.preventDefault();
+                
+                var targetSection = $(this).data('section');
+                
+                // Update active state
+                $('.list-group-item').removeClass('active');
+                $(this).addClass('active');
+                
+                // Hide all sections
+                $('.section-content').hide();
+                
+                // Show target section
+                $('#' + targetSection).show();
+                  // Load restaurant reviews if reviews section is selected
+                if (targetSection === 'reviews-section') {
+                    loadRestaurantReviews();
+                }
+            });
+            
+            // Function to load restaurant reviews
+            function loadRestaurantReviews() {
+                $('#restaurant-reviews-container').html(`
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Đang tải...</span>
+                        </div>
+                        <p class="mt-2">Đang tải đánh giá...</p>
+                    </div>
+                `);
+                
+                $.get('@Url.Action("GetRestaurantReviews", "Account")')
+                    .done(function(data) {
+                        $('#restaurant-reviews-container').html(data);
+                    })
+                    .fail(function() {
+                        $('#restaurant-reviews-container').html(`
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Không thể tải danh sách đánh giá. Vui lòng thử lại sau.
+                            </div>
+                        `);
+                    });            }
+            
+            // Change password form submission
+            $(document).on('submit', '#change-password-form', function(e) {
+                e.preventDefault();
+                
+                var form = $(this);
+                var submitBtn = form.find('button[type="submit"]');
+                var originalText = submitBtn.html();
+                
+                // Show loading state
+                submitBtn.html('<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...');
+                submitBtn.prop('disabled', true);
+                
+                // Clear previous messages
+                $('#change-password-message').empty();
+                
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: form.serialize(),
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $('#change-password-message').html(`
+                                <div class="alert alert-success alert-dismissible fade show">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    ${response.message}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            `);
+                            form[0].reset();
+                        } else {
+                            $('#change-password-message').html(`
+                                <div class="alert alert-danger alert-dismissible fade show">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    ${response.message}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            `);
+                        }
+                    },
+                    error: function() {
+                        $('#change-password-message').html(`
+                            <div class="alert alert-danger alert-dismissible fade show">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Có lỗi xảy ra. Vui lòng thử lại sau.
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        `);
+                    },
+                    complete: function() {
+                        // Restore button state
+                        submitBtn.html(originalText);
+                        submitBtn.prop('disabled', false);
+                    }
+                });
+            });
+        });
+    </script>
+}

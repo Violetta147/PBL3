@@ -1,0 +1,97 @@
+@{
+    ViewData["Title"] = "Xác nhận Email";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    @if (ViewData["StatusMessage"] != null)
+                    {
+                        @if (ViewData["StatusMessage"].ToString().Contains("Cảm ơn"))
+                        {
+                            <div class="alert alert-success" role="alert">
+                                <i class="fas fa-check-circle fa-3x mb-3 text-success"></i>
+                                <h4 class="alert-heading">Xác nhận thành công!</h4>
+                                <p class="mb-0">@ViewData["StatusMessage"]</p>
+                            </div>
+                            
+                            @if (ViewData["SuccessReturnUrl"] != null)
+                            {
+                                <div class="mt-3">
+                                    <a href="@ViewData["SuccessReturnUrl"]" class="btn btn-primary">
+                                        <i class="fas fa-arrow-right me-2"></i>Tiếp tục
+                                    </a>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="mt-3">
+                                    <a href="@Url.Action("Index", "Home")" class="btn btn-primary">
+                                        <i class="fas fa-home me-2"></i>Về trang chủ
+                                    </a>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="alert alert-danger" role="alert">
+                                <i class="fas fa-exclamation-triangle fa-3x mb-3 text-danger"></i>
+                                <h4 class="alert-heading">Có lỗi xảy ra!</h4>
+                                <p class="mb-0">@ViewData["StatusMessage"]</p>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">
+                                    <i class="fas fa-home me-2"></i>Về trang chủ
+                                </a>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle fa-3x mb-3 text-info"></i>
+                            <h4 class="alert-heading">Đang xử lý...</h4>
+                            <p class="mb-0">Đang xác nhận email của bạn. Vui lòng đợi...</p>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Đang tải...</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            <div class="text-center mt-3">
+                <small class="text-muted">
+                    Nếu bạn gặp vấn đề, vui lòng liên hệ với chúng tôi qua email hỗ trợ.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto redirect after successful confirmation
+        @if (ViewData["StatusMessage"] != null && ViewData["StatusMessage"].ToString().Contains("Cảm ơn"))
+        {
+            <text>
+            setTimeout(function() {
+                @if (ViewData["SuccessReturnUrl"] != null)
+                {
+                    <text>window.location.href = '@ViewData["SuccessReturnUrl"]';</text>
+                }
+                else
+                {
+                    <text>window.location.href = '@Url.Action("Index", "Home")';</text>
+                }
+            }, 5000); // Redirect after 5 seconds
+            </text>
+        }
+    </script>
+}

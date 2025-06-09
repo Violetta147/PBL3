@@ -1,0 +1,218 @@
+@model PBL3.ViewModel.ManageAccountViewModel
+
+<div class="col-md-4 mb-4 mb-md-0">
+    <div class="account-sidebar">
+        <!-- User Profile Card -->
+        <div class="card mb-4 sidebar-card border-0 shadow-sm">
+            <div class="card-body text-center pt-4 pb-3">
+                @{
+                    var avatarUrl = "/images/default-avatar.svg";
+                    var user = ViewContext.HttpContext.User;
+                    
+                    if (ViewBag.AvatarUrl != null)
+                    {
+                        avatarUrl = ViewBag.AvatarUrl;
+                    }
+                }                <div class="profile-image-container mb-3">
+                    <img src="@avatarUrl" alt="@Model.UserName" class="rounded-circle profile-image" 
+                         onerror="this.src='/images/default-avatar.svg'; this.onerror=null;">
+                    
+                    @if (Model.IsViewingOwnProfile)
+                    {
+                        <div class="avatar-overlay">
+                            <button type="button" class="btn btn-sm btn-light upload-avatar-btn" data-bs-toggle="modal" data-bs-target="#uploadAvatarModal">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                        </div>
+                    }
+                </div>
+                
+                <h5 class="card-title mb-1 fw-bold">@Model.UserName</h5>
+                <p class="text-muted small mb-3">@Model.Email</p>
+                
+                <div class="account-status-indicators d-flex justify-content-center gap-2 mb-2">
+                    @if (Model.IsEmailConfirmed)
+                    {
+                        <span class="badge bg-success" title="Email đã xác thực">
+                            <i class="fas fa-envelope-check me-1"></i>Email
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark" title="Email chưa xác thực">
+                            <i class="fas fa-envelope me-1"></i>Email
+                        </span>
+                    }
+                    
+                    @if (Model.TwoFactorEnabled)
+                    {
+                        <span class="badge bg-success" title="Xác thực 2 lớp đã bật">
+                            <i class="fas fa-shield-check me-1"></i>2FA
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary" title="Xác thực 2 lớp chưa bật">
+                            <i class="fas fa-shield me-1"></i>2FA
+                        </span>
+                    }                </div>
+            </div>
+        </div>
+          <!-- Navigation Menu -->
+        <div class="card sidebar-card border-0 shadow-sm mb-4">
+            <div class="card-header border-0 bg-primary text-white">
+                <h5 class="card-title mb-0"><i class="fas fa-cog me-2"></i>
+                    @if (Model.IsViewingOwnProfile)
+                    {
+                        <text>Quản lý tài khoản</text>
+                    }
+                    else
+                    {
+                        <text>Thông tin cá nhân</text>
+                    }
+                </h5>
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="#profile" class="list-group-item list-group-item-action active" data-section="profile-section">
+                    <i class="fas fa-user me-2"></i>Hồ sơ cá nhân
+                </a>
+                
+                @if (Model.IsViewingOwnProfile)
+                {
+                    <a href="#security" class="list-group-item list-group-item-action" data-section="security-section">
+                        <i class="fas fa-shield-alt me-2"></i>Bảo mật
+                    </a>
+                    <a href="#change-password" class="list-group-item list-group-item-action" data-section="change-password-section">
+                        <i class="fas fa-key me-2"></i>Đổi mật khẩu
+                    </a>
+                    <a href="#reviews" class="list-group-item list-group-item-action" data-section="reviews-section">
+                        <i class="fas fa-star me-2"></i>Đánh giá của tôi
+                    </a>
+                    @* Orders section is commented/hidden as per requirements
+                    <a asp-controller="Account" asp-action="Orders" class="list-group-item list-group-item-action">
+                        <i class="fas fa-shopping-basket me-2"></i>Đơn hàng của tôi
+                    </a>
+                    *@
+                    <a href="https://restaurant-management.fishloot.com" target="_blank" class="list-group-item list-group-item-action">
+                        <i class="fas fa-external-link-alt me-2"></i>Quản lý nhà hàng
+                        <i class="fas fa-external-link-alt ms-1 small text-muted"></i>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Sidebar styling */
+    .account-sidebar {
+        position: sticky;
+        top: 20px;
+    }
+    
+    .sidebar-card {
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+    
+    .sidebar-card .card-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    /* Profile image styling */
+    .profile-image-container {
+        position: relative;
+        display: inline-block;
+        margin: 0 auto;
+    }
+    
+    .profile-image {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border: 3px solid #25A18E;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .avatar-overlay {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .profile-image-container:hover .avatar-overlay {
+        opacity: 1;
+    }
+    
+    .upload-avatar-btn {
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .upload-avatar-btn:hover {
+        background-color: #fff;
+        transform: scale(1.1);
+    }
+    
+    /* List group styling */
+    .list-group-item {
+        border-left: none;
+        border-right: none;
+        padding: 0.75rem 1.25rem;
+    }
+    
+    .list-group-item i {
+        width: 20px;
+        text-align: center;
+    }
+    
+    .list-group-item.active {
+        background-color: #25A18E;
+        border-color: #25A18E;
+    }
+    
+    /* Badge styling */
+    .account-status-indicators .badge {
+        padding: 0.4rem 0.6rem;
+    }
+</style>
+
+<!-- Modal for Uploading Avatar -->
+@if (Model.IsViewingOwnProfile)
+{
+    <div class="modal fade" id="uploadAvatarModal" tabindex="-1" aria-labelledby="uploadAvatarModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadAvatarModalLabel">Đổi ảnh đại diện</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form asp-controller="Account" asp-action="UploadAvatar" method="post" enctype="multipart/form-data" id="uploadAvatarForm">
+                        <div class="mb-3">
+                            <label for="avatarFile" class="form-label">Chọn ảnh đại diện mới</label>
+                            <input type="file" class="form-control" id="avatarFile" name="AvatarFile" accept="image/*" required>
+                            <div class="form-text">
+                                Định dạng hỗ trợ: JPG, JPEG, PNG. Kích thước tối đa: 5MB.
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                            <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary">Tải lên</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}

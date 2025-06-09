@@ -1,0 +1,102 @@
+﻿@model List<PBL3.ViewModel.Menu.MenuViewModel>
+@* Model ở đây là danh sách các Menu *@
+@* RestaurantId sẽ được truyền qua ViewBag từ Action GetMenuStructurePartial *@
+
+@if (Model != null && Model.Any())
+{
+    foreach (var menu in Model)
+    {
+        <div class="card mb-3 menu-card" id="menu-@menu.Id">
+            <div class="card-header menu-header">
+                <h5 class="mb-0">
+                    @menu.Title @(!menu.IsActive ? Html.Raw("<span class='badge bg-secondary ms-2'>Không hoạt động</span>") : "")
+                    <small class="text-muted d-block" style="font-size:0.8rem;">Thứ tự: @menu.DisplayOrder</small>
+                </h5>
+                <div class="menu-actions">
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#menuCrudModal"
+                            data-url="@Url.Action("GetEditMenuForm", "Business", new { menuId = menu.Id })"
+                            data-modal-title="Sửa Thực Đơn: @menu.Title">
+                        <i class="fas fa-edit"></i> Sửa
+                    </button>
+                    <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#menuCrudModal"
+                            data-url="@Url.Action("GetCreateMenuSectionForm", "Business", new { menuId = menu.Id, restaurantId = ViewBag.RestaurantId })"
+                            data-modal-title="Thêm Mục cho: @menu.Title">
+                        <i class="fas fa-plus-square"></i> Thêm Mục
+                    </button>
+                    <button type="button" class="btn btn-outline-danger btn-sm btn-delete-menu" data-id="@menu.Id" data-name="@menu.Title" data-url="@Url.Action("DeleteMenu", "Business")">
+                        <i class="fas fa-trash"></i> Xóa
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                @if (menu.MenuSections != null && menu.MenuSections.Any())
+                {
+                    @foreach (var msection in menu.MenuSections)
+                    {
+                        <div class="menu-level section-card mb-2" id="section-@msection.Id">
+                            <div class="section-header">
+                                <h6 class="mb-0">
+                                    @msection.Title
+                                    <small class="text-muted d-block" style="font-size:0.75rem;">Thứ tự: @msection.DisplayOrder</small>
+                                </h6>
+                                <div class="menu-section-actions">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#menuCrudModal"
+                                            data-url="@Url.Action("GetEditMenuSectionForm", "Business", new { sectionId = msection.Id })"
+                                            data-modal-title="Sửa Mục: @msection.Title">
+                                        <i class="fas fa-edit"></i> Sửa
+                                    </button>
+                                    <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#menuCrudModal"
+                                            data-url="@Url.Action("GetCreateMenuItemForm", "Business", new { sectionId = msection.Id, restaurantId = ViewBag.RestaurantId })"
+                                            data-modal-title="Thêm Món cho: @msection.Title">
+                                        <i class="fas fa-utensil-spoon"></i> Thêm Món
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm btn-delete-section" data-id="@msection.Id" data-name="@msection.Title" data-url="@Url.Action("DeleteMenuSection", "Business")">
+                                        <i class="fas fa-trash"></i> Xóa
+                                    </button>
+                                </div>
+                            </div>
+                            @if (msection.MenuItems != null && msection.MenuItems.Any())
+                            {
+                                <ul class="list-group list-group-flush">
+                                    @foreach (var item in msection.MenuItems)
+                                    {
+                                        <li class="list-group-item item-header" id="item-@item.Id">
+                                            <span>
+                                                @item.Name @(item.IsSignatureDish ? Html.Raw("<i class='fas fa-star text-warning ms-1' title='Món đặc sắc'></i>") : "")
+                                                @(!item.IsAvailable ? Html.Raw("<span class='badge bg-danger ms-1'>Hết hàng</span>") : "")
+                                                - <span class="text-success fw-bold">@item.PriceDisplay</span>
+                                                 <small class="text-muted d-block" style="font-size:0.7rem;">Thứ tự: @item.DisplayOrder</small>
+                                            </span>
+                                            <div class="menu-item-actions">
+                                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#menuCrudModal"
+                                                        data-url="@Url.Action("GetEditMenuItemForm", "Business", new { itemId = item.Id })"
+                                                        data-modal-title="Sửa Món: @item.Name">
+                                                    <i class="fas fa-edit"></i> Sửa
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger btn-sm btn-delete-item" data-id="@item.Id" data-name="@item.Name" data-url="@Url.Action("DeleteMenuItem", "Business")">
+                                                    <i class="fas fa-trash"></i> Xóa
+                                                </button
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p class="text-muted p-2 small"><em>Mục này chưa có món ăn nào.</em></p>
+                            }
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted p-2"><em>Thực đơn này chưa có mục nào.</em></p>
+                }
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="alert alert-info">Nhà hàng này chưa có thực đơn nào. Bạn có thể bắt đầu bằng cách tạo một thực đơn mới ở trên.</div>
+}
