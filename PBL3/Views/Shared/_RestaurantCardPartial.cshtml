@@ -130,13 +130,22 @@
                     }
                 </div>
             </div>
-            
-            <!-- Button positioned at bottom right -->
-            <div class="d-grid position-absolute bottom-0 end-0 m-2">
-                <a href="/Restaurant/Details/@restaurant.Id" class="btn btn-outline-primary btn-sm">
-                    <i class="bi bi-eye me-1"></i> Xem chi tiết
-                </a>
-            </div>
+              <!-- Button positioned at bottom right -->
+            @{
+                var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+                var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+                bool isReviewPage = currentController?.Equals("Reviews", StringComparison.OrdinalIgnoreCase) == true &&
+                                   (currentAction?.Equals("Create", StringComparison.OrdinalIgnoreCase) == true ||
+                                    currentAction?.Equals("SelectRestaurantForReview", StringComparison.OrdinalIgnoreCase) == true);
+            }
+            @if (!isReviewPage)
+            {
+                <div class="d-grid position-absolute bottom-0 end-0 m-2">
+                    <a href="https://localhost:7085/Restaurants/Details/@restaurant.Id" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-eye me-1"></i> Xem chi tiết
+                    </a>
+                </div>
+            }
         </div>
     </div>
 }

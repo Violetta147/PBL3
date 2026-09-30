@@ -15,12 +15,8 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/PBL3.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/leaflet-maps.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/custom-style.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/nav-bar.css" asp-append-version="true" />
-    <!-- Add Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <!-- Z-index fix for map and UI overlays -->
@@ -158,7 +154,6 @@
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.js"></script>
 
-    @await RenderSectionAsync("Scripts", required: false)
 
     <script>
         $(document).ready(function () {
@@ -241,7 +236,7 @@
         });
     </script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bs5-lightbox@1.8.4/dist/index.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

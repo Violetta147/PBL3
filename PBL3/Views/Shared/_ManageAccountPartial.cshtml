@@ -85,17 +85,18 @@
                     <a href="#change-password" class="list-group-item list-group-item-action" data-section="change-password-section">
                         <i class="fas fa-key me-2"></i>Đổi mật khẩu
                     </a>
-                    <a href="#reviews" class="list-group-item list-group-item-action" data-section="reviews-section">
+                    @* <a href="#reviews" class="list-group-item list-group-item-action" data-section="reviews-section">
                         <i class="fas fa-star me-2"></i>Đánh giá của tôi
-                    </a>
+                    </a> *@
                     @* Orders section is commented/hidden as per requirements
                     <a asp-controller="Account" asp-action="Orders" class="list-group-item list-group-item-action">
                         <i class="fas fa-shopping-basket me-2"></i>Đơn hàng của tôi
                     </a>
                     *@
-                    <a href="https://restaurant-management.fishloot.com" target="_blank" class="list-group-item list-group-item-action">
-                        <i class="fas fa-external-link-alt me-2"></i>Quản lý nhà hàng
-                        <i class="fas fa-external-link-alt ms-1 small text-muted"></i>
+                    <a href="https://localhost:7085/Business/MyRestaurants" 
+                       class="list-group-item list-group-item-action" 
+                       target="_blank">
+                        <i class="fas fa-store me-2"></i>Quản lý nhà hàng
                     </a>
                 }
             </div>

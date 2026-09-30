@@ -187,14 +187,163 @@ namespace PBL3.Data.Seeder
                     TargetAddressLine1Part: "Nguyễn Hữu Huân", // Cần địa chỉ cụ thể
                     MinPrice: 25000, MaxPrice: 60000, ImageUrlSuffix: "giang_cafe.jpg", Status: RestaurantStatus.Open,
                     OperatingHours: GenerateOperatingHours(allDay:true, openHour:7, closeHour:22)
-                ),
-                (
+                ),                (
                     Name: "Nhà Hàng Lục Thủy - View Hồ Gươm",
                     Description: "Nhà hàng sang trọng với view nhìn ra Hồ Hoàn Kiếm. Ẩm thực Việt và quốc tế.",
                     TargetCity: "TP. Hà Nội",
                     TargetAddressLine1Part: "29 Phố Tràng Tiền", // Giả sử dùng chung địa chỉ với Chả Cá cho demo
                     MinPrice: 400000, MaxPrice: 2000000, ImageUrlSuffix: "luc_thuy_restaurant.jpg", Status: RestaurantStatus.Open,
                     OperatingHours: GenerateOperatingHours(allDay:true, openHour:10, closeHour:23)
+                ),
+
+                // === THÊM NHÓNG NHHA HAÀNG ĐA DẠNG MỚI ===
+
+                // --- Đà Nẵng - Nhóm Street Food & Fast Casual ---
+                (
+                    Name: "Bánh Mì Phượng Đà Nẵng",
+                    Description: "Bánh mì Việt Nam nổi tiếng với nhân đa dạng: chả lụa, pate, thịt nướng. Giá rẻ, ngon.",
+                    TargetCity: "TP. Đà Nẵng",
+                    TargetAddressLine1Part: "04 Bạch Đằng",
+                    MinPrice: 15000, MaxPrice: 45000, ImageUrlSuffix: "banhmi_phuong.jpg", Status: RestaurantStatus.Open,
+                    OperatingHours: GenerateOperatingHours(allDay: true, openHour: 6, closeHour: 19)
+                ),
+                (
+                    Name: "Nem Lụi Nướng Bà Tám",
+                    Description: "Nem lụi nướng than hoa truyền thống, ăn kèm bánh tráng, rau sống và tương chấm đặc biệt.",
+                    TargetCity: "TP. Đà Nẵng",
+                    TargetAddressLine1Part: "270 Nguyễn Văn Linh",
+                    MinPrice: 25000, MaxPrice: 80000, ImageUrlSuffix: "nemlui_ba_tam.jpg", Status: RestaurantStatus.Open,
+                    OperatingHours: GenerateOperatingHours(allDay: true, openHour: 15, closeHour: 22)
+                ),
+                (
+                    Name: "Chè Hến Cô Ba Đà Nẵng",
+                    Description: "Đặc sản chè hến Đà Nẵng với hến tươi, bánh tráng nướng giòn rụm. Hương vị độc đáo.",
+                    TargetCity: "TP. Đà Nẵng",
+                    TargetAddressLine1Part: "Lô 14 Hoàng Sa",
+                    MinPrice: 20000, MaxPrice: 50000, ImageUrlSuffix: "che_hen.jpg", Status: RestaurantStatus.Open,
+                    OperatingHours: GenerateOperatingHours(allDay: true, openHour: 14, closeHour: 21)
+                ),
+
+                // --- TP. Hồ Chí Minh - Nhóm Fine Dining & International ---
+                (
+                    Name: "EON Heli Bar - Rooftop Dining",
+                    Description: "Nhà hàng cao cấp trên nóc tòa nhà cao tầng, view 360° thành phố. Ẩm thực fusion tinh tế.",
+                    TargetCity: "TP. Hồ Chí Minh",
+                    TargetAddressLine1Part: "22 Nguyễn Huệ",
+                    MinPrice: 800000, MaxPrice: 3000000, ImageUrlSuffix: "eon_heli_bar.jpg", Status: RestaurantStatus.Open,
+                    OperatingHours: GenerateOperatingHours(allDay: false, days: new List<DayOfWeek>{DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday}, openHour: 18, closeHour: 23, fridaySaturdayCloseHour: 0)
+                ),
+                (
+                    Name: "Quan Bui Saigon - Modern Vietnamese",
+                    Description: "Ẩm thực Việt Nam hiện đại trong không gian sang trọng. Cocktail độc đáo với hương vị Việt.",
+                    TargetCity: "TP. Hồ Chí Minh",
+                    TargetAddressLine1Part: "180 Pasteur",
+                    MinPrice: 300000, MaxPrice: 800000, ImageUrlSuffix: "quan_bui.jpg", Status: RestaurantStatus.Open,
+                    OperatingHours: GenerateOperatingHours(allDay: true, openHour: 11, closeHour: 23)
+                ),
+                (
+                    Name: "Saigon Skydeck - BBQ & Grill",
+                    Description: "Nhà hàng BBQ cao cấp với thịt bò Wagyu, hải sản tươi sống. View sông Sài Gòn tuyệt đẹp.",
+                    TargetCity: "TP. Hồ Chí Minh",
+                    TargetAddressLine1Part: "22 Nguyễn Huệ",
+                    MinPrice: 600000, MaxPrice: 2500000, ImageUrlSuffix: "saigon_skydeck.jpg", Status: RestaurantStatus.Open,
+                    OperatingHours: GenerateOperatingHours(allDay: true, openHour: 17, closeHour: 24, fridaySaturdayCloseHour: 0)
+                ),
+
+                // --- TP. Hồ Chí Minh - Nhóm Local Street Food ---
+                (
+                    Name: "Hủ Tiếu Nam Vang Mỹ Tho",
+                    Description: "Hủ tiếu Nam Vang truyền thống với nước dùng ngọt thanh, tôm tươi, thịt băm.",
+                    TargetCity: "TP. Hồ Chí Minh",
+                    TargetAddressLine1Part: "180 Pasteur",
+                    MinPrice: 35000, MaxPrice: 80000, ImageUrlSuffix: "hutieu_nam_vang.jpg", Status: RestaurantStatus.Open,
+                    OperatingHours: GenerateOperatingHours(allDay: true, openHour: 6, closeHour: 15)
+                ),
+                (
+                    Name: "Bánh Tráng Nướng Đà Lạt Sài Gòn",
+                    Description: "Bánh tráng nướng Đà Lạt với trứng cút, chà bông, pate. Vị giòn thơm đặc trưng.",
+                    TargetCity: "TP. Hồ Chí Minh",
+                    TargetAddressLine1Part: "22 Nguyễn Huệ",
+                    MinPrice: 20000, MaxPrice: 60000, ImageUrlSuffix: "banhtrang_nuong.jpg", Status: RestaurantStatus.Open,
+                    OperatingHours: GenerateOperatingHours(allDay: true, openHour: 16, closeHour: 23)
+                ),
+                (
+                    Name: "Cơm Tấm Sườn Nướng Ba Ghiền",
+                    Description: "Cơm tấm Sài Gòn với sườn nướng thơm lừng, chả trứng, bì. Ăn kèm nước mắm chua ngọt.",
+                    TargetCity: "TP. Hồ Chí Minh",
+                    TargetAddressLine1Part: "180 Pasteur",
+                    MinPrice: 40000, MaxPrice: 120000, ImageUrlSuffix: "com_tam_suon.jpg", Status: RestaurantStatus.Open,
+                    OperatingHours: GenerateOperatingHours(allDay: true, openHour: 10, closeHour: 21)
+                ),
+
+                // --- Hà Nội - Nhóm Traditional & Heritage ---
+                (
+                    Name: "Bún Bò Huế Cô Huệ Hà Nội",
+                    Description: "Bún bò Huế chuẩn vị miền Trung với nước dùng đậm đà, thịt bò tươi ngon, chả cua.",
+                    TargetCity: "TP. Hà Nội",
+                    TargetAddressLine1Part: "50 Lý Thường Kiệt",
+                    MinPrice: 50000, MaxPrice: 120000, ImageUrlSuffix: "bunbo_hue.jpg", Status: RestaurantStatus.Open,
+                    OperatingHours: GenerateOperatingHours(allDay: true, openHour: 7, closeHour: 21)
+                ),
+                (
+                    Name: "Bánh Cuốn Gia Truyền Thanh Vân",
+                    Description: "Bánh cuốn Hà Nội làm thủ công, bánh mỏng dai, nhân thịt băm nấm hương thơm ngon.",
+                    TargetCity: "TP. Hà Nội",
+                    TargetAddressLine1Part: "29 Phố Tràng Tiền",
+                    MinPrice: 35000, MaxPrice: 80000, ImageUrlSuffix: "banh_cuon.jpg", Status: RestaurantStatus.Open,
+                    OperatingHours: GenerateOperatingHours(allDay: true, openHour: 6, closeHour: 18)
+                ),
+                (
+                    Name: "Lẩu Cá Đầu To - Phố Cổ Hà Nội",
+                    Description: "Lẩu cá đầu to với nước dùng chua cay, rau rừng Tây Bắc. Không gian ấm cúng phố cổ.",
+                    TargetCity: "TP. Hà Nội",
+                    TargetAddressLine1Part: "Nguyễn Hữu Huân",
+                    MinPrice: 180000, MaxPrice: 450000, ImageUrlSuffix: "lau_ca_dau_to.jpg", Status: RestaurantStatus.Open,
+                    OperatingHours: GenerateOperatingHours(allDay: true, openHour: 17, closeHour: 23)
+                ),
+
+                // --- Hà Nội - Nhóm Cafes & Desserts ---
+                (
+                    Name: "Highlands Coffee Hồ Gươm",
+                    Description: "Chuỗi cà phê nổi tiếng với đồ uống đa dạng, không gian hiện đại. View Hồ Hoàn Kiếm.",
+                    TargetCity: "TP. Hà Nội",
+                    TargetAddressLine1Part: "29 Phố Tràng Tiền",
+                    MinPrice: 30000, MaxPrice: 120000, ImageUrlSuffix: "highlands_coffee.jpg", Status: RestaurantStatus.Open,
+                    OperatingHours: GenerateOperatingHours(allDay: true, openHour: 6, closeHour: 23)
+                ),
+                (
+                    Name: "Chè Đậu Xanh Bà Thìn",
+                    Description: "Chè truyền thống Hà Nội với đậu xanh, bánh lọt, thạch. Vị ngọt thanh mát.",
+                    TargetCity: "TP. Hà Nội",
+                    TargetAddressLine1Part: "50 Lý Thường Kiệt",
+                    MinPrice: 15000, MaxPrice: 40000, ImageUrlSuffix: "che_dau_xanh.jpg", Status: RestaurantStatus.Open,
+                    OperatingHours: GenerateOperatingHours(allDay: true, openHour: 13, closeHour: 22)
+                ),
+
+                // --- Nhóm Regional Specialties (các vùng miền khác) ---
+                (
+                    Name: "Cơm Hến Huế - Đậm Đà Xứ Huế",
+                    Description: "Cơm hến Huế truyền thống với hến tươi, rau thơm, bánh tráng. Hương vị cung đình.",
+                    TargetCity: "TP. Đà Nẵng",
+                    TargetAddressLine1Part: "123 Ông Ích Khiêm",
+                    MinPrice: 25000, MaxPrice: 60000, ImageUrlSuffix: "com_hen_hue.jpg", Status: RestaurantStatus.Open,
+                    OperatingHours: GenerateOperatingHours(allDay: true, openHour: 10, closeHour: 20)
+                ),
+                (
+                    Name: "Bánh Khọt Vũng Tàu - Hương Biển",
+                    Description: "Bánh khọt Vũng Tàu với tôm tươi, bánh giòn rụm. Chấm nước mắm chua ngọt đặc trưng.",
+                    TargetCity: "TP. Hồ Chí Minh",
+                    TargetAddressLine1Part: "22 Nguyễn Huệ",
+                    MinPrice: 30000, MaxPrice: 90000, ImageUrlSuffix: "banh_khot.jpg", Status: RestaurantStatus.Open,
+                    OperatingHours: GenerateOperatingHours(allDay: true, openHour: 14, closeHour: 21)
+                ),
+                (
+                    Name: "Cao Lầu Hội An - Vị Xưa Phố Cổ",
+                    Description: "Cao lầu Hội An với sợi mì đặc biệt, thịt xá xíu, bánh phông tôm. Hương vị độc nhất.",
+                    TargetCity: "TP. Đà Nẵng",
+                    TargetAddressLine1Part: "Võ Nguyên Giáp",
+                    MinPrice: 45000, MaxPrice: 100000, ImageUrlSuffix: "cao_lau.jpg", Status: RestaurantStatus.Open,
+                    OperatingHours: GenerateOperatingHours(allDay: true, openHour: 9, closeHour: 21)
                 )
             };
 

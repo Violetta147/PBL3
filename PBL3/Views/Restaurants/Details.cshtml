@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="~/css/restaurant-details.css" asp-append-version="true" />
     @* Link Leaflet CSS nếu dùng bản đồ *@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!--Custom CSS-->
+    <link rel="stylesheet" href="~/css/directions-button.css" asp-append-version="true" />
+
 }
 
 @if (Model == null)
@@ -363,7 +366,14 @@
             <div class="section-card"> @* Bọc sidebar trong card cho nhất quán *@
                 @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
                 {
-                    <div id="mapDetailSidebar" class="map-sidebar-container"></div>
+                   <div id="mapDetailSidebar" class="map-sidebar-container"></div>
+                   <div class="directions-container mt-3">
+                        <button type="button" class="btn btn-primary directions-btn" onclick="openDirectionsPage()">
+                            <i class="fas fa-route"></i> Xem đường đi
+                        </button>
+                    </div>
+                }
+    </div>
                 }
                 <div class="info-list mt-3">
                     <div class="info-item">
@@ -419,7 +429,7 @@
 
 @section Scripts {
     @* Script cho các thư viện ngoài (nếu chưa có trong _Layout.cshtml) *@
-    @* <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> *@
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -427,12 +437,13 @@
         @if (Model != null && Model.Latitude.HasValue && Model.Longitude.HasValue)
         {
             // Sử dụng CultureInfo.InvariantCulture để đảm bảo dấu . cho số thập phân
-            var latSidebar = @Model.Latitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            var lonSidebar = @Model.Longitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
             <text>
+            var latSidebar = @Model.Latitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            var lonSidebar = @Model.Longitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
                     if (document.getElementById('mapDetailSidebar')) {
                         try {
+                            
                             var mapSidebar = L.map('mapDetailSidebar').setView([latSidebar, lonSidebar], 16);
                             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                                 attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -454,5 +465,46 @@
             //     $(this).ekkoLightbox();
             // });
         });
+
+        // Di chuyển hàm này ra ngoài DOMContentLoaded để có thể gọi từ onclick
+        function openDirectionsPage() {
+            @if (Model != null && Model.Latitude.HasValue && Model.Longitude.HasValue)
+            {
+                <text>
+                // Chuyển hướng đến trang ASP.NET với tham số tọa độ
+                var lat = @Model.Latitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                var lon = @Model.Longitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                var locationId = @Model.Id; // Nếu có ID của location
+                
+                window.location.href = `/Directions/Index?lat=${lat}&lon=${lon}&locationId=${locationId}`;
+                </text>
+            }
+        }
+
+        // Hoặc     muốn mở Google Maps trực tiếp
+        function showDirections() {
+            @if (Model != null && Model.Latitude.HasValue && Model.Longitude.HasValue)
+            {
+                <text>
+                var lat = @Model.Latitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                var lon = @Model.Longitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        var userLat = position.coords.latitude;
+                        var userLon = position.coords.longitude;
+                        var googleMapsUrl = `https://www.google.com/maps/dir/${userLat},${userLon}/${lat},${lon}`;
+                        window.open(googleMapsUrl, '_blank');
+                    }, function(error) {
+                        var googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+                        window.open(googleMapsUrl, '_blank');
+                    });
+                } else {
+                    var googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+                    window.open(googleMapsUrl, '_blank');
+                }
+                </text>
+            }
+        }
     </script>
 }

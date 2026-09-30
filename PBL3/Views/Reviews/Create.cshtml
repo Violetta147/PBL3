@@ -1,12 +1,137 @@
-﻿@model PBL3.ViewModel.Review.CreateReviewViewModel
+@model PBL3.ViewModel.Review.CreateReviewViewModel
 @{
     ViewData["Title"] = $"Viết đánh giá cho {Model.RestaurantName}";
-    // Layout = ...
+    ViewData["BodyClass"] = "review-create-page";
 }
 
-<div class="container mt-4 mb-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-7">
+@section Styles {
+    <!-- Mapbox GL CSS -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Custom CSS-->
+    <link rel="stylesheet" href="~/css/restaurant-card.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/search-results.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/pagination.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/lib/spiderifier/mapboxgl-spiderifier.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/search-map-spider.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/scattered-markers.css" asp-append-version="true">
+    <style>
+        .review-create-page {
+            padding: 0;
+            margin: 0;
+        }
+        
+        #main-frame {
+            height: calc(100vh - 60px); /* Adjust based on header height */
+            display: flex;
+            overflow: hidden;
+        }
+        
+        #left-section {
+            flex: 0 0 50%;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        #search-section {
+            flex: 0 0 auto;
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            background-color: #f8f9fa;
+        }
+        
+        #review-form-section {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+        
+        #map-section {
+            flex: 0 0 50%;
+            height: 100%;
+            position: relative;
+        }
+        
+        #mapbox-container {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .restaurant-search-form {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .restaurant-search-input {
+            flex: 2;
+            border-radius: 0.375rem 0 0 0.375rem;
+        }
+        
+        .location-search-input {
+            flex: 2;
+            border-left: none;
+            border-radius: 0;
+        }
+        
+        .search-button {
+            border-radius: 0 0.375rem 0.375rem 0;
+            padding: 0.5rem 1rem;
+        }
+        
+        @@media (max-width: 768px) {
+            #main-frame {
+                flex-direction: column;
+            }
+            
+            #left-section, #map-section {
+                flex: 1;
+                height: 50vh;
+            }
+        }
+    </style>
+}
+
+<!-- Hidden fields to pass data to JavaScript -->
+<input type="hidden" id="mapbox-token" value="@ViewBag.MapboxToken">
+<input type="hidden" id="map-initial-lat" value="16.075000">
+<input type="hidden" id="map-initial-lng" value="108.206230">
+<input type="hidden" id="selected-restaurant-id" value="@ViewBag.SelectedRestaurantId">
+<input type="hidden" id="selected-restaurant-lat" value="@ViewBag.SelectedRestaurantLat">
+<input type="hidden" id="selected-restaurant-lng" value="@ViewBag.SelectedRestaurantLng">
+
+<div class="container-fluid" id="main-frame">
+    <!-- LEFT SECTION (Search & Review Form) -->
+    <div id="left-section">
+        <!-- Search Section -->
+        <div id="search-section">
+            <div class="search-container">
+                <form class="restaurant-search-form" id="restaurant-search-form" autocomplete="off">
+                    <input type="text" name="searchTerm" class="form-control restaurant-search-input" 
+                           placeholder="Tìm kiếm nhà hàng..." autocomplete="off" autocapitalize="off" 
+                           autocorrect="off" spellcheck="false">
+                    <input type="text" name="Address" class="form-control location-search-input" 
+                           placeholder="Địa điểm..." autocomplete="off" autocapitalize="off" 
+                           autocorrect="off" spellcheck="false">
+                    <button type="submit" class="btn btn-primary search-button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <input type="hidden" name="lat" id="searchLat" />
+                    <input type="hidden" name="lng" id="searchLng" />
+                </form>
+            </div>
+        </div>
+        
+        <!-- Review Form Section -->
+        <div id="review-form-section">
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
                     <h4 class="mb-0">Viết đánh giá cho: @Model.RestaurantName</h4>
@@ -17,7 +142,6 @@
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
                         <input type="hidden" asp-for="RestaurantId" />
-                        @* RestaurantName chỉ để hiển thị, không cần input *@
 
                         <div class="mb-3">
                             <label asp-for="Rating" class="form-label fw-bold"></label>
@@ -27,7 +151,7 @@
                                     <i class="far fa-star star-rating-item" data-value="@i" style="cursor:pointer; color: #FFD700;"></i>
                                 }
                             </div>
-                            <input type="hidden" asp-for="Rating" id="ratingValue" /> @* Input ẩn để lưu giá trị sao *@
+                            <input type="hidden" asp-for="Rating" id="ratingValue" />
                             <span asp-validation-for="Rating" class="text-danger"></span>
                         </div>
 
@@ -41,7 +165,7 @@
                             <label asp-for="Photos" class="form-label fw-bold"></label>
                             <input asp-for="Photos" type="file" multiple class="form-control" accept="image/png, image/jpeg, image/gif" />
                             <span asp-validation-for="Photos" class="text-danger"></span>
-                            <small class="form-text text-muted">Bạn có thể chọn nhiều ảnh (tối đa 5 ảnh, mỗi ảnh không quá 5MB - ví dụ giới hạn).</small>
+                            <small class="form-text text-muted">Bạn có thể chọn nhiều ảnh (tối đa 5 ảnh, mỗi ảnh không quá 5MB).</small>
                         </div>
 
                         <div class="d-grid">
@@ -57,19 +181,40 @@
             </div>
         </div>
     </div>
+    
+    <!-- RIGHT SECTION (Map) -->
+    <div id="map-section">
+        <div id="mapbox-container" data-restaurant-id="@ViewBag.SelectedRestaurantId"></div>
+    </div>
 </div>
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    
+    <!-- Mapbox GL JS -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.js"></script>
+    <!-- Spiderifier Library -->
+    <script src="~/lib/spiderifier/mapboxgl-spiderifier.js" asp-append-version="true"></script>
+    <!-- Search functionality scripts -->
+    <script src="~/js/search/search-storage.js" asp-append-version="true"></script>
+    <script src="~/js/search/search-validation.js" asp-append-version="true"></script>
+    <script src="~/js/search/search-core.js" asp-append-version="true"></script>
+    <script src="~/js/search/search-ui.js" asp-append-version="true"></script>
+    <!-- Map with Clustering and Spiderifier JS -->
+    <script src="~/js/search/search-map.js" asp-append-version="true"></script>
+    <!-- Pagination JS -->
+    <script src="~/js/search/pagination.js" asp-append-version="true"></script>
+    
     <script>
         $(document).ready(function () {
+            // Star rating functionality
             let currentRating = 0;
             const stars = $('#starRating .star-rating-item');
             const ratingInput = $('#ratingValue');
 
-            // Khởi tạo trạng thái sao nếu có giá trị ban đầu (khi form load lại với lỗi)
+            // Initialize star rating if there's an initial value
             const initialRating = parseInt(ratingInput.val());
             if (!isNaN(initialRating) && initialRating > 0) {
                 currentRating = initialRating;
@@ -82,29 +227,86 @@
             });
 
             stars.on('mouseout', function () {
-                highlightStars(currentRating); // Quay lại rating đã chọn
+                highlightStars(currentRating);
             });
 
             stars.on('click', function () {
                 currentRating = $(this).data('value');
-                ratingInput.val(currentRating); // Cập nhật input ẩn
+                ratingInput.val(currentRating);
                 updateStars(currentRating);
-                // Trigger validation cho rating nếu cần
-                ratingInput.trigger('change'); // Hoặc một event khác mà validation lắng nghe
+                ratingInput.trigger('change');
             });
 
             function highlightStars(rating) {
                 stars.each(function (index) {
                     if ((index + 1) <= rating) {
-                        $(this).removeClass('far').addClass('fas'); // fas là sao đầy
+                        $(this).removeClass('far').addClass('fas');
                     } else {
-                        $(this).removeClass('fas').addClass('far'); // far là sao rỗng
+                        $(this).removeClass('fas').addClass('far');
                     }
                 });
             }
+            
             function updateStars(rating) {
-                 currentRating = rating; // Cập nhật rating hiện tại
+                 currentRating = rating;
                  highlightStars(rating);
+            }
+            
+            // Initialize map and show selected restaurant popup
+            function initializeMap() {
+                if (typeof window.initSearchMap === 'function') {
+                    window.initSearchMap();
+                    
+                    // Show popup for selected restaurant after map is loaded
+                    setTimeout(() => {
+                        const selectedId = $('#selected-restaurant-id').val();
+                        const selectedLat = parseFloat($('#selected-restaurant-lat').val());
+                        const selectedLng = parseFloat($('#selected-restaurant-lng').val());
+                        
+                        if (selectedId && !isNaN(selectedLat) && !isNaN(selectedLng)) {
+                            // Center map on selected restaurant
+                            if (window.map) {
+                                window.map.setCenter([selectedLng, selectedLat]);
+                                window.map.setZoom(16);
+                                
+                                // Create and show popup for the selected restaurant
+                                if (typeof window.showRestaurantPopup === 'function') {
+                                    window.showRestaurantPopup(selectedId, selectedLat, selectedLng);
+                                }
+                            }
+                        }
+                    }, 1000);
+                }
+            }
+            
+            // Wait for search map scripts to load
+            if (typeof window.initSearchMap !== 'undefined') {
+                initializeMap();
+            } else {
+                // Retry after a short delay
+                setTimeout(initializeMap, 500);
+            }
+        });
+        
+        // Override search form to prevent navigation and just update map
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchForm = document.getElementById('restaurant-search-form');
+            if (searchForm) {
+                searchForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Get form data
+                    const formData = new FormData(this);
+                    const searchTerm = formData.get('searchTerm');
+                    const address = formData.get('Address');
+                    const lat = formData.get('lat');
+                    const lng = formData.get('lng');
+                    
+                    // Update map with search results
+                    if (typeof window.performSearch === 'function') {
+                        window.performSearch(searchTerm, address, lat, lng);
+                    }
+                });
             }
         });
     </script>

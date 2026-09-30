@@ -4,69 +4,128 @@ using Microsoft.AspNetCore.Mvc;
 using PBL3.Models;
 using PBL3.Services.Interfaces;
 using PBL3.ViewModel.Review;
+using PBL3.ViewModel;
 using System.Threading.Tasks;
+using System.Linq;
+using Microsoft.Extensions.Configuration;
+using X.PagedList;
 
 namespace PBL3.Controllers
 {
+    [Authorize]
     public class ReviewsController : Controller
     {
         private readonly IReviewService _reviewService;
         private readonly UserManager<AppUser> _userManager;
         private readonly IRestaurantService _restaurantService;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly IConfiguration _config;
 
-        public ReviewsController(SignInManager<AppUser> signInManager, IReviewService reviewService, UserManager<AppUser> userManager, IRestaurantService restaurantService)
+        public ReviewsController(SignInManager<AppUser> signInManager, IReviewService reviewService, UserManager<AppUser> userManager, IRestaurantService restaurantService, IConfiguration config)
         {
             _reviewService = reviewService;
             _userManager = userManager;
             _restaurantService = restaurantService;
             _signInManager = signInManager;
+            _config = config;
         }
 
-        [HttpGet]
         public IActionResult HandleWriteReview()
         {
             if (_signInManager.IsSignedIn(User))
             {
                 // Đã đăng nhập, chuyển đến trang chọn nhà hàng để review
-                return RedirectToAction(nameof(SelectRestaurantForReview));
+                //construct object trước khi redirect
+                var queryParams = new
+                {
+                    searchTerm = "",
+                    pageNumber = 1,
+                    pageSize = 10
+                };
+                return RedirectToAction(nameof(SelectRestaurantForReview), queryParams);
             }
             else
             {
                 TempData["ShowLoginModal"] = "true"; // Truyền dưới dạng string
-                TempData["LoginReturnUrl"] = Url.Action(nameof(SelectRestaurantForReview), "Reviews");
+                TempData["LoginReturnUrl"] = Url.Action(nameof(SelectRestaurantForReview), "Reviews", new { searchTerm = "", pageNumber = 1, pageSize = 10 });
 
                 // Luôn redirect về trang chủ (hoặc một trang đích an toàn khác)
                 // Trang chủ sẽ có JavaScript để đọc TempData và mở modal.
                 return RedirectToAction("Index", "Home");
-            }
-        }
+            }        }
 
-        [Authorize] // Chỉ người đã đăng nhập mới vào được trang này
-        public IActionResult SelectRestaurantForReview()
+        public async Task<IActionResult> SelectRestaurantForReview(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
-            // TODO: Implement logic để hiển thị UI cho việc chọn nhà hàng
-            // Ví dụ: trả về một View với ô tìm kiếm nhà hàng
-            // Sau khi chọn, sẽ redirect đến /Reviews/Create?restaurantId={id}
-            ViewData["Message"] = "Đây là trang để bạn chọn nhà hàng muốn đánh giá.";
-            return View(); // Cần tạo View Views/Reviews/SelectRestaurantForReview.cshtml
-        }
+            ViewData["SearchTerm"] = searchTerm;
 
-        // GET: Reviews/Create?restaurantId=5
+            // Use SearchRestaurantsAdvancedAsync to get restaurants
+            var pagedRestaurants = await _restaurantService.SearchRestaurantsAdvancedAsync(
+                searchTerm: searchTerm,
+                pageNumber: pageNumber,
+                pageSize: pageSize,
+                sortBy: "relevance"
+            );
+
+            // Convert to RestaurantCardViewModel list with pagination info
+            var restaurantCards = pagedRestaurants.Select(r => new RestaurantCardViewModel
+            {
+                Id = r.Id,
+                Name = r.Name,
+                Description = r.Description,
+                FullAddress = r.Address?.FullAddress ?? "",
+                CardImageUrl = r.MainImageUrl ?? "/images/default-restaurant.jpg",
+                CuisineSummary = r.RestaurantCuisines?.Select(rc => rc.CuisineType.Name).ToList<string?>() ?? new List<string?>(),
+                AverageRating = r.AverageRating,
+                ReviewCount = r.ReviewCount,
+                MinTypicalPrice = r.MinTypicalPrice,
+                MaxTypicalPrice = r.MaxTypicalPrice,
+                Latitude = r.Address?.Latitude,
+                Longitude = r.Address?.Longitude,
+                Status = r.Status,
+                Cuisines = r.RestaurantCuisines?.Select(rc => rc.CuisineType).ToList(),
+                Tags = r.RestaurantTags?.Select(rt => rt.Tag).ToList(),
+                OperatingHours = r.OperatingHours
+            }).ToList();
+
+            // Create a paged list using X.PagedList
+            var pagedList = new X.PagedList.StaticPagedList<RestaurantCardViewModel>(
+                restaurantCards,
+                pagedRestaurants.PageNumber,
+                pagedRestaurants.PageSize,
+                pagedRestaurants.TotalItemCount
+            );
+
+            return View(pagedList);
+        }        // GET: Reviews/Create?restaurantId=5
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> Create(int restaurantId)
         {
-            var restaurant = await _restaurantService.GetRestaurantByIdAsync(restaurantId); // Dùng service để lấy nhà hàng
+            int targetRestaurantId = restaurantId;
+            
+            if (targetRestaurantId <= 0)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy nhà hàng để đánh giá.";
+                return RedirectToAction(nameof(SelectRestaurantForReview));
+            }
+
+            var restaurant = await _restaurantService.GetRestaurantByIdAsync(targetRestaurantId);
             if (restaurant == null)
             {
                 TempData["ErrorMessage"] = "Không tìm thấy nhà hàng để đánh giá.";
-                return RedirectToAction("Index", "Home"); // Hoặc trang tìm kiếm nhà hàng
+                return RedirectToAction(nameof(SelectRestaurantForReview));
             }
+
+            // Prepare ViewBag data for the 2-frame layout with search and map
+            ViewBag.MapboxToken = _config["Mapbox:AccessToken"];
+            ViewBag.CuisineTypes = await _restaurantService.GetCuisineTypesAsync();
+            ViewBag.SelectedRestaurantId = targetRestaurantId;
+            ViewBag.SelectedRestaurantLat = restaurant.Address?.Latitude;
+            ViewBag.SelectedRestaurantLng = restaurant.Address?.Longitude;
 
             var viewModel = new CreateReviewViewModel
             {
-                RestaurantId = restaurantId,
+                RestaurantId = targetRestaurantId,
                 RestaurantName = restaurant.Name
             };
             return View(viewModel);
@@ -224,6 +283,41 @@ namespace PBL3.Controllers
             // Nếu NewPhotos gây lỗi, có thể cần xóa chúng khỏi model trước khi trả về View.
 
             return View(model);
+        }
+
+        // API endpoint for restaurant search suggestions (for dropdown)
+        [HttpGet]
+        public async Task<JsonResult> SearchRestaurantSuggestions(string query, int limit = 10)
+        {
+            if (string.IsNullOrWhiteSpace(query) || query.Length < 2)
+            {
+                return Json(new List<object>());
+            }
+
+            try
+            {
+                var suggestions = await _restaurantService.SearchRestaurantsAdvancedAsync(
+                    searchTerm: query,
+                    pageNumber: 1,
+                    pageSize: limit,
+                    sortBy: "relevance"
+                );                var results = suggestions.Select(r => new
+                {
+                    id = r.Id,
+                    name = r.Name,
+                    fullAddress = r.Address?.FullAddress ?? "Chưa có địa chỉ",
+                    cardImageUrl = r.MainImageUrl ?? "/images/default-restaurant.jpg",
+                    cuisines = r.RestaurantCuisines?.Select(rc => rc.CuisineType.Name).Take(3).ToList() ?? new List<string>(),
+                    rating = r.AverageRating.ToString("0.0"),
+                    reviewCount = r.ReviewCount
+                }).ToList();
+
+                return Json(results);
+            }
+            catch (Exception)
+            {
+                return Json(new List<object>());
+            }
         }
 
     }

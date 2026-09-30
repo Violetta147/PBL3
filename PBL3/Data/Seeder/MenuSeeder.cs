@@ -147,27 +147,141 @@ namespace PBL3.Data.Seeder
 
                     var drinksCreativeSection = AddSection(menu, "Đồ Uống Sáng Tạo & Rượu Vang", 4);
                     AddDrinksToSection(drinksCreativeSection, restaurant.Id, allCategories, getCategoryId, includeJuiceSmoothie: true, includeWine: true, includeCocktail: true);
-                }
-                // --- Menu mặc định cho các nhà hàng còn lại ---
+                }                // --- Menu mặc định cho các nhà hàng còn lại ---
                 else
                 {
-                    var defaultKhaiVi = AddSection(menu, "Món Khai Vị Tổng Hợp", 1);
-                    AddItem(defaultKhaiVi, restaurant.Id, "Gỏi Xoài Tôm Thịt", "Gỏi xoài xanh chua ngọt với tôm, thịt ba chỉ.", 70000m, new List<int?> { getCategoryId("Gỏi & Salad", "Món Khai Vị") });
-                    AddItem(defaultKhaiVi, restaurant.Id, "Nem Chua Rán Hà Nội", "Nem chua rán giòn, chấm tương ớt.", 60000m, new List<int?> { getCategoryId("Đồ Chiên (Khai Vị)", "Món Khai Vị"), getCategoryId("Nem Các Loại (Ăn Vặt)", "Đồ Ăn Vặt & Ăn Nhẹ") });
+                    // Check for specific new restaurant types and create custom menus
+                    if (restaurant.Name.Contains("Bánh Mì Phượng"))
+                    {
+                        var banhMiSection = AddSection(menu, "Bánh Mì Đặc Sản", 1);
+                        AddItem(banhMiSection, restaurant.Id, "Bánh Mì Thập Cẩm Phượng", "Bánh mì với chả lụa, pate, thịt nguội, rau củ chua ngọt.", 25000m, new List<int?> { getCategoryId("Bánh Các Loại (Mặn & Ngọt)", null) });
+                        AddItem(banhMiSection, restaurant.Id, "Bánh Mì Thịt Nướng Mật Ong", "Bánh mì thịt heo nướng mật ong thơm lừng.", 30000m, new List<int?> { getCategoryId("Bánh Các Loại (Mặn & Ngọt)", null) });
+                        AddItem(banhMiSection, restaurant.Id, "Bánh Mì Pate Chả Truyền Thống", "Bánh mì pate chả kiểu truyền thống.", 20000m, new List<int?> { getCategoryId("Bánh Các Loại (Mặn & Ngọt)", null) });
+                        
+                        var doUongSection = AddSection(menu, "Đồ Uống Giải Khát", 2);
+                        AddDrinksToSection(doUongSection, restaurant.Id, allCategories, getCategoryId, includeJuiceSmoothie: true);
+                    }
+                    else if (restaurant.Name.Contains("Nem Lụi Nướng"))
+                    {
+                        var nemLuiSection = AddSection(menu, "Nem Lụi & Đồ Nướng", 1);
+                        AddItem(nemLuiSection, restaurant.Id, "Nem Lụi Nướng Sả (5 Xiên)", "Nem lụi quấn sả nướng than hoa, ăn kèm bánh tráng và rau sống.", 50000m, new List<int?> { getCategoryId("Thịt Nướng (Ba Chỉ, Sườn, Bò Mỹ)", "Đồ Nướng & BBQ (Theo Loại)") });
+                        AddItem(nemLuiSection, restaurant.Id, "Nem Lụi Nướng Lá Chuối", "Nem lụi gói lá chuối, giữ nguyên hương vị truyền thống.", 55000m, new List<int?> { getCategoryId("Thịt Nướng (Ba Chỉ, Sườn, Bò Mỹ)", "Đồ Nướng & BBQ (Theo Loại)") });
+                        AddItem(nemLuiSection, restaurant.Id, "Bánh Tráng Nướng", "Bánh tráng nướng giòn, chấm tương ớt.", 25000m, new List<int?> { getCategoryId("Bánh Các Loại (Mặn & Ngọt)", null) });
+                    }
+                    else if (restaurant.Name.Contains("Chè Hến"))
+                    {
+                        var cheHenSection = AddSection(menu, "Đặc Sản Chè Hến", 1);
+                        AddItem(cheHenSection, restaurant.Id, "Chè Hến Đà Nẵng Đặc Biệt", "Chè hến với hến tươi, bánh tráng nướng, rau thơm.", 35000m, new List<int?> { getCategoryId("Món Ăn Nhẹ (Chè, Xôi)", "Đồ Ăn Vặt & Ăn Nhẹ") });
+                        AddItem(cheHenSection, restaurant.Id, "Chè Hến Tôm Khô", "Chè hến có thêm tôm khô thơm bùi.", 40000m, new List<int?> { getCategoryId("Món Ăn Nhẹ (Chè, Xôi)", "Đồ Ăn Vặt & Ăn Nhẹ") });
+                    }
+                    else if (restaurant.Name.Contains("EON Heli Bar"))
+                    {
+                        var fineDiningSection = AddSection(menu, "Fine Dining Experience", 1);
+                        AddItem(fineDiningSection, restaurant.Id, "Wagyu Beef Tasting Menu", "Thực đơn thịt bò Wagyu cao cấp với 5 món.", 2800000m, new List<int?> { getCategoryId("Món Thịt (Heo, Bò, Gà,...)", "Món Chính") });
+                        AddItem(fineDiningSection, restaurant.Id, "Lobster Thermidor", "Tôm hùm Thermidor kiểu Pháp.", 1800000m, new List<int?> { getCategoryId("Món Cá & Hải Sản Chế Biến", "Món Chính") });
+                        AddItem(fineDiningSection, restaurant.Id, "Foie Gras with Truffle", "Gan ngỗng béo với nấm truffle.", 1500000m, new List<int?> { getCategoryId("Món Khai Vị", null) });
+                        
+                        var cocktailSection = AddSection(menu, "Signature Cocktails", 2);
+                        AddDrinksToSection(cocktailSection, restaurant.Id, allCategories, getCategoryId, includeCocktail: true, includeWine: true);
+                    }
+                    else if (restaurant.Name.Contains("Hủ Tiếu Nam Vang"))
+                    {
+                        var huTieuSection = AddSection(menu, "Hủ Tiếu Nam Vang", 1);
+                        AddItem(huTieuSection, restaurant.Id, "Hủ Tiếu Nam Vang Đặc Biệt", "Hủ tiếu Nam Vang với tôm, thịt băm, gan, tim.", 60000m, new List<int?> { getCategoryId("Bún/Phở/Mì/Miến/Hủ Tiếu", "Món Đặc Trưng & Theo Loại") });
+                        AddItem(huTieuSection, restaurant.Id, "Hủ Tiếu Khô", "Hủ tiếu khô chan nước dùng riêng.", 55000m, new List<int?> { getCategoryId("Bún/Phở/Mì/Miến/Hủ Tiếu", "Món Đặc Trưng & Theo Loại") });
+                        AddItem(huTieuSection, restaurant.Id, "Hủ Tiếu Mì", "Hủ tiếu kết hợp với mì trứng.", 58000m, new List<int?> { getCategoryId("Bún/Phở/Mì/Miến/Hủ Tiếu", "Món Đặc Trưng & Theo Loại") });
+                    }
+                    else if (restaurant.Name.Contains("Bánh Tráng Nướng Đà Lạt"))
+                    {
+                        var banhTrangSection = AddSection(menu, "Bánh Tráng Nướng Đà Lạt", 1);
+                        AddItem(banhTrangSection, restaurant.Id, "Bánh Tráng Nướng Trứng Cút", "Bánh tráng nướng với trứng cút, chà bông, hành lá.", 35000m, new List<int?> { getCategoryId("Bánh Các Loại (Mặn & Ngọt)", null) });
+                        AddItem(banhTrangSection, restaurant.Id, "Bánh Tráng Nướng Pate", "Bánh tráng nướng với pate, mayonnaise.", 40000m, new List<int?> { getCategoryId("Bánh Các Loại (Mặn & Ngọt)", null) });
+                        AddItem(banhTrangSection, restaurant.Id, "Bánh Tráng Nướng Đặc Biệt", "Bánh tráng nướng đầy đủ topping: trứng, chà bông, pate, xúc xích.", 50000m, new List<int?> { getCategoryId("Bánh Các Loại (Mặn & Ngọt)", null) });
+                    }
+                    else if (restaurant.Name.Contains("Cơm Tấm Sườn"))
+                    {
+                        var comTamSection = AddSection(menu, "Cơm Tấm Sài Gòn", 1);
+                        AddItem(comTamSection, restaurant.Id, "Cơm Tấm Sườn Nướng", "Cơm tấm với sườn nướng, trứng ốp la, bì.", 70000m, new List<int?> { getCategoryId("Cơm Các Loại", "Món Đặc Trưng & Theo Loại") });
+                        AddItem(comTamSection, restaurant.Id, "Cơm Tấm Bì Chả", "Cơm tấm với bì, chả trứng.", 60000m, new List<int?> { getCategoryId("Cơm Các Loại", "Món Đặc Trưng & Theo Loại") });
+                        AddItem(comTamSection, restaurant.Id, "Cơm Tấm Thập Cẩm", "Cơm tấm đầy đủ: sườn, bì, chả, trứng.", 85000m, new List<int?> { getCategoryId("Cơm Các Loại", "Món Đặc Trưng & Theo Loại") });
+                    }
+                    else if (restaurant.Name.Contains("Bún Bò Huế"))
+                    {
+                        var bunBoHueSection = AddSection(menu, "Bún Bò Huế Chuẩn Vị", 1);
+                        AddItem(bunBoHueSection, restaurant.Id, "Bún Bò Huế Đặc Biệt", "Bún bò Huế với thịt bò, chả cua, giò heo.", 80000m, new List<int?> { getCategoryId("Bún/Phở/Mì/Miến/Hủ Tiếu", "Món Đặc Trưng & Theo Loại") });
+                        AddItem(bunBoHueSection, restaurant.Id, "Bún Bò Huế Chay", "Bún bò Huế chay với nấm, đậu hũ.", 65000m, new List<int?> { getCategoryId("Bún/Phở/Mì/Miến/Hủ Tiếu", "Món Đặc Trưng & Theo Loại") });
+                    }
+                    else if (restaurant.Name.Contains("Bánh Cuốn"))
+                    {
+                        var banhCuonSection = AddSection(menu, "Bánh Cuốn Gia Truyền", 1);
+                        AddItem(banhCuonSection, restaurant.Id, "Bánh Cuốn Thịt", "Bánh cuốn nhân thịt băm, nấm hương.", 50000m, new List<int?> { getCategoryId("Bánh Các Loại (Mặn & Ngọt)", null) });
+                        AddItem(banhCuonSection, restaurant.Id, "Bánh Cuốn Chả Lụa", "Bánh cuốn chả lụa thái lát mỏng.", 55000m, new List<int?> { getCategoryId("Bánh Các Loại (Mặn & Ngọt)", null) });
+                    }
+                    else if (restaurant.Name.Contains("Lẩu Cá Đầu To"))
+                    {
+                        var lauSection = AddSection(menu, "Lẩu Cá Đầu To", 1);
+                        AddItem(lauSection, restaurant.Id, "Lẩu Cá Đầu To Chua Cay", "Lẩu cá đầu to với rau rừng, nước dùng chua cay.", 320000m, new List<int?> { getCategoryId("Lẩu Chua Cay (Đầu Cá, Riêu Cua)", "Lẩu Các Loại") });
+                        AddItem(lauSection, restaurant.Id, "Combo Rau Rừng", "Combo rau rừng tây bắc cho lẩu.", 80000m, new List<int?> { getCategoryId("Rau Các Loại (Luộc/Xào)", "Món Chính") });
+                    }
+                    else if (restaurant.Name.Contains("Highlands Coffee"))
+                    {
+                        var coffeeSection = AddSection(menu, "Signature Coffee", 1);
+                        AddItem(coffeeSection, restaurant.Id, "Freeze Trà Xanh", "Đá xay trà xanh Highlands.", 65000m, new List<int?> { getCategoryId("Cà Phê (Pha Chế)", "Đồ Uống") });
+                        AddItem(coffeeSection, restaurant.Id, "Phin Cà Phê Sữa Đá", "Cà phê phin truyền thống.", 45000m, new List<int?> { getCategoryId("Cà Phê (Pha Chế)", "Đồ Uống") });
+                        
+                        var cakeSection = AddSection(menu, "Bánh & Snacks", 2);
+                        AddItem(cakeSection, restaurant.Id, "Bánh Mì Que", "Bánh mì que thơm giòn.", 25000m, new List<int?> { getCategoryId("Bánh Ngọt (Tráng Miệng)", "Món Tráng Miệng") });
+                    }
+                    else if (restaurant.Name.Contains("Cơm Hến Huế"))
+                    {
+                        var comHenSection = AddSection(menu, "Cơm Hến Huế", 1);
+                        AddItem(comHenSection, restaurant.Id, "Cơm Hến Huế Đặc Biệt", "Cơm hến với hến tươi, rau thơm, bánh tráng.", 45000m, new List<int?> { getCategoryId("Cơm Các Loại", "Món Đặc Trưng & Theo Loại") });
+                    }
+                    else if (restaurant.Name.Contains("Bánh Khọt"))
+                    {
+                        var banhKhotSection = AddSection(menu, "Bánh Khọt Vũng Tàu", 1);
+                        AddItem(banhKhotSection, restaurant.Id, "Bánh Khọt Tôm (15 Cái)", "Bánh khọt Vũng Tàu với tôm tươi.", 80000m, new List<int?> { getCategoryId("Bánh Các Loại (Mặn & Ngọt)", null) });
+                    }
+                    else if (restaurant.Name.Contains("Cao Lầu Hội An"))
+                    {
+                        var caoLauSection = AddSection(menu, "Cao Lầu Hội An", 1);
+                        AddItem(caoLauSection, restaurant.Id, "Cao Lầu Hội An Đặc Biệt", "Cao lầu với sợi mì đặc biệt, thịt xá xíu, bánh phông tôm.", 75000m, new List<int?> { getCategoryId("Bún/Phở/Mì/Miến/Hủ Tiếu", "Món Đặc Trưng & Theo Loại") });
+                    }
+                    // === SEASONAL MENU ITEMS (Added to all restaurants) ===
+                    else
+                    {
+                        var defaultKhaiVi = AddSection(menu, "Món Khai Vị Tổng Hợp", 1);
+                        AddItem(defaultKhaiVi, restaurant.Id, "Gỏi Xoài Tôm Thịt", "Gỏi xoài xanh chua ngọt với tôm, thịt ba chỉ.", 70000m, new List<int?> { getCategoryId("Gỏi & Salad", "Món Khai Vị") });
+                        AddItem(defaultKhaiVi, restaurant.Id, "Nem Chua Rán Hà Nội", "Nem chua rán giòn, chấm tương ớt.", 60000m, new List<int?> { getCategoryId("Đồ Chiên (Khai Vị)", "Món Khai Vị"), getCategoryId("Nem Các Loại (Ăn Vặt)", "Đồ Ăn Vặt & Ăn Nhẹ") });
 
+                        var defaultMonChinh = AddSection(menu, "Món Chính Đa Dạng", 2);
+                        AddItem(defaultMonChinh, restaurant.Id, "Bò Lúc Lắc Khoai Tây Chiên", "Thịt bò mềm xào lúc lắc, ăn kèm khoai tây chiên.", 150000m, new List<int?> { getCategoryId("Món Thịt (Heo, Bò, Gà,...)", "Món Chính") });
+                        AddItem(defaultMonChinh, restaurant.Id, "Gà Ta Quay Lu Da Giòn", "Gà ta nguyên con quay lu, da vàng giòn, thịt mềm ngọt.", 350000m, new List<int?> { getCategoryId("Gà Nướng (Nguyên Con, Cánh, Đùi)", "Đồ Nướng & BBQ (Theo Loại)"), getCategoryId("Món Thịt (Heo, Bò, Gà,...)", "Món Chính") });
+                        AddItem(defaultMonChinh, restaurant.Id, "Canh Chua Cá Lóc Miền Tây", "Canh chua cá lóc đậm đà hương vị miền Tây.", 120000m, new List<int?> { getCategoryId("Súp Khai Vị", "Món Khai Vị"), getCategoryId("Món Cá & Hải Sản Chế Biến", "Món Chính") }); // Canh cũng có thể là món chính
 
-                    var defaultMonChinh = AddSection(menu, "Món Chính Đa Dạng", 2);
-                    AddItem(defaultMonChinh, restaurant.Id, "Bò Lúc Lắc Khoai Tây Chiên", "Thịt bò mềm xào lúc lắc, ăn kèm khoai tây chiên.", 150000m, new List<int?> { getCategoryId("Món Thịt (Heo, Bò, Gà,...)", "Món Chính") });
-                    AddItem(defaultMonChinh, restaurant.Id, "Gà Ta Quay Lu Da Giòn", "Gà ta nguyên con quay lu, da vàng giòn, thịt mềm ngọt.", 350000m, new List<int?> { getCategoryId("Gà Nướng (Nguyên Con, Cánh, Đùi)", "Đồ Nướng & BBQ (Theo Loại)"), getCategoryId("Món Thịt (Heo, Bò, Gà,...)", "Món Chính") });
-                    AddItem(defaultMonChinh, restaurant.Id, "Canh Chua Cá Lóc Miền Tây", "Canh chua cá lóc đậm đà hương vị miền Tây.", 120000m, new List<int?> { getCategoryId("Súp Khai Vị", "Món Khai Vị"), getCategoryId("Món Cá & Hải Sản Chế Biến", "Món Chính") }); // Canh cũng có thể là món chính
+                        var defaultTrangMieng = AddSection(menu, "Tráng Miệng Ngọt Ngào", 3);
+                        AddItem(defaultTrangMieng, restaurant.Id, "Trái Cây Theo Mùa", "Đĩa trái cây tươi theo mùa.", 50000m, new List<int?> { getCategoryId("Trái Cây Tươi", "Món Tráng Miệng") });
+                        AddItem(defaultTrangMieng, restaurant.Id, "Sữa Chua Nếp Cẩm", "Sữa chua sánh mịn ăn kèm nếp cẩm dẻo thơm.", 35000m, new List<int?> { getCategoryId("Kem & Yogurt", "Món Tráng Miệng") });
 
+                        var defaultDoUong = AddSection(menu, "Đồ Uống Phổ Biến", 4);
+                        AddDrinksToSection(defaultDoUong, restaurant.Id, allCategories, getCategoryId, includeJuiceSmoothie: true, includeBeer: true);
+                    }
 
-                    var defaultTrangMieng = AddSection(menu, "Tráng Miệng Ngọt Ngào", 3);
-                    AddItem(defaultTrangMieng, restaurant.Id, "Trái Cây Theo Mùa", "Đĩa trái cây tươi theo mùa.", 50000m, new List<int?> { getCategoryId("Trái Cây Tươi", "Món Tráng Miệng") });
-                    AddItem(defaultTrangMieng, restaurant.Id, "Sữa Chua Nếp Cẩm", "Sữa chua sánh mịn ăn kèm nếp cẩm dẻo thơm.", 35000m, new List<int?> { getCategoryId("Kem & Yogurt", "Món Tráng Miệng") });
-
-                    var defaultDoUong = AddSection(menu, "Đồ Uống Phổ Biến", 4);
-                    AddDrinksToSection(defaultDoUong, restaurant.Id, allCategories, getCategoryId, includeJuiceSmoothie: true, includeBeer: true);
+                    // Add seasonal items to all restaurants (except specialty single-dish restaurants)
+                    if (!restaurant.Name.Contains("Bánh Mì") && !restaurant.Name.Contains("Chè Hến") && 
+                        !restaurant.Name.Contains("Bánh Tráng Nướng") && !restaurant.Name.Contains("Highlands Coffee"))
+                    {
+                        var seasonalSection = AddSection(menu, "Món Đặc Biệt Theo Mùa", 99);
+                        
+                        // Current season items (Summer)
+                        AddItem(seasonalSection, restaurant.Id, "Salad Hoa Quả Mùa Hè", "Salad trái cây tươi mát với sốt mật ong chanh.", 85000m, new List<int?> { getCategoryId("Gỏi & Salad", "Món Khai Vị") });
+                        AddItem(seasonalSection, restaurant.Id, "Chè Thập Cẩm Đậu Xanh Mát Lạnh", "Chè đậu xanh với thạch, bánh lọt, nha đam.", 45000m, new List<int?> { getCategoryId("Chè Các Loại", "Món Tráng Miệng") });
+                        AddItem(seasonalSection, restaurant.Id, "Nước Dừa Tươi Nguyên Trái", "Nước dừa tươi nguyên trái mát lạnh.", 35000m, new List<int?> { getCategoryId("Nước Ép & Sinh Tố", "Đồ Uống") });
+                        
+                        // Traditional festival items
+                        AddItem(seasonalSection, restaurant.Id, "Bánh Chưng Tết Nguyên Đán", "Bánh chưng truyền thống (chỉ có vào dịp Tết).", 80000m, new List<int?> { getCategoryId("Bánh Các Loại (Mặn & Ngọt)", null) });
+                        AddItem(seasonalSection, restaurant.Id, "Bánh Trung Thu Thập Cẩm", "Bánh trung thu nhân thập cẩm (chỉ có vào rằm tháng 8).", 120000m, new List<int?> { getCategoryId("Bánh Ngọt (Tráng Miệng)", "Món Tráng Miệng") });
+                    }
                 }
 
 

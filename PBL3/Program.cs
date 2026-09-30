@@ -85,8 +85,7 @@ builder.Services.AddAuthentication()
             opts.ClientId = googleAuthNSection["ClientId"];
             opts.ClientSecret = googleAuthNSection["ClientSecret"];
             opts.SignInScheme = IdentityConstants.ExternalScheme;
-            opts.CallbackPath = new PathString("/signin-google");
-        });
+            opts.CallbackPath = new PathString("/signin-google");        });
 builder.Services.AddAuthorization(opts => {
     opts.AddPolicy("AspManager", policy => {
         policy.RequireRole("Manager");
@@ -102,7 +101,7 @@ builder.Services.AddAuthorization(opts => {
 });
 builder.Services.AddTransient<PBL3.Ultilities.EmailHelper>();
 
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+// builder.Services.AddDatabaseDeveloperPageExceptionFilter(); // Commented out to remove debug information display
 
 // Add HttpClient for API calls
 builder.Services.AddHttpClient();
@@ -131,24 +130,24 @@ using (var scope = app.Services.CreateScope())
         var userManager = services.GetRequiredService<UserManager<AppUser>>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-        // // Seed dữ liệu
-        // await CuisineTypeSeeder.SeedCuisineTypesAsync(context);
-        // await CategorySeeder.SeedAsync(context);
-        // await TagSeeder.SeedTagsAsync(context);
+        // Seed dữ liệu
+        await CuisineTypeSeeder.SeedCuisineTypesAsync(context);
+        await CategorySeeder.SeedAsync(context);
+        await TagSeeder.SeedTagsAsync(context);
 
-        // // Gọi seeder cho Roles và Users
-        // await RoleAndUserSeeder.SeedRolesAsync(roleManager); // Gọi riêng để đảm bảo roles được tạo trước
-        // await RoleAndUserSeeder.SeedAdminUsersAsync(userManager, roleManager);
-        // await RoleAndUserSeeder.SeedBasicUsersAsync(userManager, roleManager);
+        // Gọi seeder cho Roles và Users
+        await RoleAndUserSeeder.SeedRolesAsync(roleManager); // Gọi riêng để đảm bảo roles được tạo trước
+        await RoleAndUserSeeder.SeedAdminUsersAsync(userManager, roleManager);
+        await RoleAndUserSeeder.SeedBasicUsersAsync(userManager, roleManager);
 
-        // // --- GỌI ADDRESS SEEDER ---
-        // await AddressSeeder.SeedAsync(context);
+        // --- GỌI ADDRESS SEEDER ---
+        await AddressSeeder.SeedAsync(context);
 
-        // await RestaurantSeeder.SeedAsync(context);
-        // await MenuSeeder.SeedAsync(context);
-        // await RestaurantCuisineSeeder.SeedAsync(context); // SEED RESTAURANT-CUISINE
-        // await RestaurantTagSeeder.SeedAsync(context);     // SEED RESTAURANT-TAG
-        // await MenuItemCategorySeeder.SeedAsync(context);
+        await RestaurantSeeder.SeedAsync(context);
+        await MenuSeeder.SeedAsync(context);
+        await RestaurantCuisineSeeder.SeedAsync(context); // SEED RESTAURANT-CUISINE
+        await RestaurantTagSeeder.SeedAsync(context);     // SEED RESTAURANT-TAG
+        await MenuItemCategorySeeder.SeedAsync(context);
     }
     catch (Exception ex)
     {
@@ -160,7 +159,8 @@ using (var scope = app.Services.CreateScope())
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseMigrationsEndPoint();
+    app.UseDeveloperExceptionPage();
+    // app.UseMigrationsEndPoint(); // Commented out to remove debug information display
 }
 else
 {
@@ -178,10 +178,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
-
-app.MapControllerRoute(
-    name: "adminDefault",
-    pattern: "{controller=AdminDashboard}/{action=Index}/{id?}"); // Route cho Area
 
 app.MapControllerRoute(
     name: "default",

@@ -810,6 +810,40 @@ function loadRestaurantsFromList() {
     }
 }
 
+// Show popup for a specific restaurant marker by ID
+function showPopupForRestaurant(restaurantId) {
+    if (!markers || markers.length === 0) return;
+    const markerObj = markers.find(m => m.marker && m.marker.restaurantId == restaurantId);
+    if (markerObj && markerObj.marker && markerObj.popup) {
+        markerObj.popup.addTo(map);
+        markerObj.marker.togglePopup();
+        // Optionally center the map on the marker
+        if (markerObj.marker.getLngLat) {
+            map.flyTo({ center: markerObj.marker.getLngLat(), zoom: 16 });
+        }
+    }
+}
+
+// On page load, check for a global variable or data attribute for restaurantId
+window.addEventListener('DOMContentLoaded', function() {
+    var restaurantId = null;
+    // Try to get from a global JS variable or from a data attribute on the map container
+    if (window.selectedRestaurantId) {
+        restaurantId = window.selectedRestaurantId;
+    } else {
+        var mapEl = document.getElementById('map');
+        if (mapEl && mapEl.dataset && mapEl.dataset.restaurantId) {
+            restaurantId = mapEl.dataset.restaurantId;
+        }
+    }
+    if (restaurantId) {
+        // Wait a bit for markers to load
+        setTimeout(function() {
+            showPopupForRestaurant(restaurantId);
+        }, 1000);
+    }
+});
+
 function createPopupContent(name, rating, reviewCount, address, id) {
     return `
         <div class="restaurant-popup" style="min-width: 200px;">
@@ -821,7 +855,7 @@ function createPopupContent(name, rating, reviewCount, address, id) {
             </div>
             <p class="small text-muted mb-2">${address}</p>
             <div class="d-flex gap-2">
-                <a href="/Restaurant/Details/${id}" class="btn btn-primary btn-sm">
+                <a href="/Restaurants/Details/${id}" class="btn btn-primary btn-sm" target="_blank">
                     Xem chi tiết
                 </a>
             </div>
@@ -834,7 +868,9 @@ function clearMarkers() {
         if (popup) popup.remove();
         if (marker) marker.remove();
     });
-    markers = [];    if (currentPopup) {
+    markers = [];
+    
+    if (currentPopup) {
         currentPopup.remove();
         currentPopup = null;
     }
@@ -851,56 +887,218 @@ function clearMarkers() {
 
 // Function to properly clean up the spiderifier
 function cleanupSpiderifier() {
-    // Clear any active spiderifier markers
     if (spiderifier) {
         try {
-            console.log('Cleaning up spiderifier...');
             spiderifier.unspiderfy();
-            
-            // Note: We're not trying to remove specific event listeners here
-            // as they're managed within each cluster click handler
+            console.log('Spiderifier cleaned up successfully');
         } catch (error) {
             console.warn('Error cleaning up spiderifier:', error);
         }
-    }    // Also clean up any scattered markers
-    if (window.scatteredMarkers) {
-        console.log('Cleaning up scattered markers...');
-        cleanupScatteredMarkers();
     }
 }
 
 // Helper function to clean up scattered marker popups specifically
-function cleanupScatteredPopups() {
-    console.log('Cleaning up scattered marker popups...');
-    
-    // Close tracked scattered popup
-    if (currentPopup) {
-        const popupElement = currentPopup.getElement();
-        if (popupElement && popupElement.classList.contains('scattered-popup')) {
-            console.log('Closing tracked scattered marker popup');
-            currentPopup.remove();
-            currentPopup = null;
-        }
-    }
-    
-    // Also clean up any untracked scattered popups
-    const allScatteredPopups = document.querySelectorAll('.mapboxgl-popup.scattered-popup');
-    if (allScatteredPopups.length > 0) {
-        console.log(`Found ${allScatteredPopups.length} untracked scattered popups, removing them`);
-        allScatteredPopups.forEach(popup => {
+function cleanupScatteredMarkers() {
+    if (window.scatteredMarkers && window.scatteredMarkers.length > 0) {
+        console.log('Cleaning up scattered markers:', window.scatteredMarkers.length);
+        
+        window.scatteredMarkers.forEach(marker => {
             try {
-                const closeButton = popup.querySelector('.mapboxgl-popup-close-button');
-                if (closeButton) {
-                    closeButton.click();
-                } else {
-                    popup.remove();
+                if (marker && marker.remove) {
+                    marker.remove();
                 }
             } catch (error) {
-                console.warn('Error removing scattered popup:', error);
+                console.warn('Error removing scattered marker:', error);
             }
         });
+        
+        window.scatteredMarkers = [];
+        console.log('All scattered markers cleaned up');
+    }
+    
+    // Reset manual scatter flag
+    if (typeof manualScatterActive !== 'undefined') {
+        manualScatterActive = false;
     }
 }
+
+// Function to check zoom level and trigger scatter view if needed
+function checkZoomForScatterView(currentZoom) {
+    // Only proceed if we have a restaurants source
+    if (!map || !map.getSource('restaurants')) {
+        return;
+    }
+    
+    // Update tracked zoom level
+    if (typeof currentZoomLevel !== 'undefined') {
+        currentZoomLevel = currentZoom;
+    }
+    
+    console.log('Checking zoom for scatter view. Current zoom:', currentZoom);
+    
+    // At high zoom levels (15+), automatically scatter overlapping markers
+    if (currentZoom >= 15) {
+        // Get all visible features
+        const features = map.querySourceFeatures('restaurants', {
+            filter: ['!', ['has', 'point_count']] // Only non-clustered points
+        });
+        
+        if (features && features.length > 1) {
+            // Check for overlapping markers that need scattering
+            const overlappingGroups = findOverlappingMarkers(features);
+            
+            if (overlappingGroups.length > 0) {
+                console.log('Found overlapping markers at high zoom, applying scatter');
+                overlappingGroups.forEach(group => {
+                    if (group.length > 1) {
+                        scatterMarkers(group, 1); // Smaller radius for automatic scatter
+                    }
+                });
+            }
+        }
+    }
+}
+
+// Function to find overlapping markers
+function findOverlappingMarkers(features) {
+    const overlappingGroups = [];
+    const processed = new Set();
+    
+    features.forEach((feature, index) => {
+        if (processed.has(index)) return;
+        
+        const group = [feature];
+        const coord1 = feature.geometry.coordinates;
+        
+        features.forEach((otherFeature, otherIndex) => {
+            if (index === otherIndex || processed.has(otherIndex)) return;
+            
+            const coord2 = otherFeature.geometry.coordinates;
+            const distance = calculateDistance(coord1, coord2);
+            
+            // If markers are very close (within ~50 meters), consider them overlapping
+            if (distance < 0.0005) { // Roughly 50 meters in degrees
+                group.push(otherFeature);
+                processed.add(otherIndex);
+            }
+        });
+        
+        if (group.length > 1) {
+            overlappingGroups.push(group);
+        }
+        processed.add(index);
+    });
+    
+    return overlappingGroups;
+}
+
+// Function to calculate distance between two coordinates
+function calculateDistance(coord1, coord2) {
+    const dx = coord1[0] - coord2[0];
+    const dy = coord1[1] - coord2[1];
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+// Function to scatter markers around a center point
+function scatterMarkers(features, radiusMultiplier = 1) {
+    if (!features || features.length <= 1) {
+        return false;
+    }
+    
+    console.log('Scattering', features.length, 'markers with radius multiplier:', radiusMultiplier);
+    
+    // Clean up any existing scattered markers first
+    cleanupScatteredMarkers();
+    
+    // Initialize scattered markers array if it doesn't exist
+    if (!window.scatteredMarkers) {
+        window.scatteredMarkers = [];
+    }
+    
+    // Calculate center point
+    const centerLng = features.reduce((sum, f) => sum + f.geometry.coordinates[0], 0) / features.length;
+    const centerLat = features.reduce((sum, f) => sum + f.geometry.coordinates[1], 0) / features.length;
+    
+    // Base radius in degrees (roughly 100 meters)
+    const baseRadius = 0.001 * radiusMultiplier;
+    
+    // Create scattered markers
+    features.forEach((feature, index) => {
+        const angle = (2 * Math.PI * index) / features.length;
+        const radius = baseRadius + (Math.random() * baseRadius * 0.5); // Add some randomness
+        
+        const scatteredLng = centerLng + radius * Math.cos(angle);
+        const scatteredLat = centerLat + radius * Math.sin(angle);
+        
+        // Create a custom marker for the scattered position
+        const markerElement = document.createElement('div');
+        markerElement.className = 'scattered-marker';
+        markerElement.style.cssText = `
+            width: 30px;
+            height: 30px;
+            background-color: #dc3545;
+            border: 2px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 1000;
+        `;
+        markerElement.textContent = feature.properties.number || (index + 1);
+        
+        // Create the marker
+        const marker = new mapboxgl.Marker(markerElement)
+            .setLngLat([scatteredLng, scatteredLat])
+            .addTo(map);
+        
+        // Add click handler for popup
+        markerElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            // Close any existing popup
+            if (currentPopup) {
+                currentPopup.remove();
+                currentPopup = null;
+            }
+            
+            // Create and show popup
+            const popup = new mapboxgl.Popup({
+                closeButton: false,
+                closeOnClick: true,
+                className: 'scattered-popup',
+                maxWidth: '300px'
+            })
+            .setLngLat([scatteredLng, scatteredLat])
+            .setHTML(feature.properties.popupContent)
+            .addTo(map);
+            
+            currentPopup = popup;
+            lastPopupOpenedTime = Date.now();
+        });
+        
+        // Store the marker for cleanup
+        window.scatteredMarkers.push(marker);
+    });
+    
+    console.log('Created', window.scatteredMarkers.length, 'scattered markers');
+    return true;
+}
+
+// Initialize variables if not already defined (removed redundant declarations)
+if (typeof lastPopupOpenedTime === 'undefined') {
+    lastPopupOpenedTime = 0;
+}
+
+// Export functions for global access if needed
+window.clearMarkers = clearMarkers;
+window.cleanupScatteredMarkers = cleanupScatteredMarkers;
+window.cleanupSpiderifier = cleanupSpiderifier;
+window.checkZoomForScatterView = checkZoomForScatterView;
+
 // Global handlers for spiderifier cleanup
 function unspiderifyWhenClickingElsewhere(e) { 
     // Check if spiderifier is active by looking at its container
@@ -1130,7 +1328,7 @@ function checkZoomForScatterView(zoomLevel) {
         
         if (zoomLevel >= 15) {
             console.log('Zoom level >= 15, checking for overlapping markers...');
-            
+
             // Query all visible restaurant features (both clustered and unclustered)
             const unclusteredFeatures = map.queryRenderedFeatures({ layers: ['unclustered-point'] });
             const clusteredFeatures = map.queryRenderedFeatures({ layers: ['clusters'] });
